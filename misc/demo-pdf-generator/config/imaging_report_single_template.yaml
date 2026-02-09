@@ -1,0 +1,23 @@
+# Imaging Report - Single Template Match Scenario
+# Patient: Jessie Jamstack (exists in DB)
+# Reviewer: Dr. Robert Johnson (NOT in DB -> Canvas Bot auto-assigned)
+# Templates: Chest X-Ray will match single imaging template
+# Pages: 1
+
+patient:
+  first_name: "Jessie"
+  last_name: "Jamstack"
+  date_of_birth: "1955-12-12"
+  mrn: "415186507"
+
+reviewer:
+  first_name: "Robert"
+  last_name: "Johnson"
+  npi: "9999999999"
+
+report:
+  type: "imaging_report"
+  date: "2026-02-03"
+  facility: "Canvas Medical Imaging Center"
+
+pages: 1

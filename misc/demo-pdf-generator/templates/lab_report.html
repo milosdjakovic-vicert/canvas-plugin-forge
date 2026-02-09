@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <style>
+        @page {
+            size: letter;
+            margin: 0.75in;
+        }
+        body {
+            font-family: Arial, sans-serif;
+            font-size: 10pt;
+            line-height: 1.4;
+            color: #333;
+        }
+        .header {
+            border-bottom: 2px solid #2c5aa0;
+            padding-bottom: 10px;
+            margin-bottom: 15px;
+        }
+        .facility-name {
+            font-size: 16pt;
+            font-weight: bold;
+            color: #2c5aa0;
+        }
+        .report-title {
+            font-size: 14pt;
+            font-weight: bold;
+            margin-top: 5px;
+        }
+        .info-grid {
+            display: table;
+            width: 100%;
+            margin-bottom: 15px;
+        }
+        .info-row {
+            display: table-row;
+        }
+        .info-cell {
+            display: table-cell;
+            padding: 3px 10px 3px 0;
+        }
+        .label {
+            font-weight: bold;
+            color: #555;
+        }
+        .section-title {
+            font-size: 11pt;
+            font-weight: bold;
+            background-color: #f0f0f0;
+            padding: 5px;
+            margin: 15px 0 10px 0;
+            border-left: 3px solid #2c5aa0;
+        }
+        table.results {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+        }
+        table.results th {
+            background-color: #2c5aa0;
+            color: white;
+            padding: 8px;
+            text-align: left;
+            font-size: 9pt;
+        }
+        table.results td {
+            padding: 6px 8px;
+            border-bottom: 1px solid #ddd;
+        }
+        table.results tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+        .flag-high {
+            color: #d32f2f;
+            font-weight: bold;
+        }
+        .flag-low {
+            color: #1976d2;
+            font-weight: bold;
+        }
+        .footer {
+            margin-top: 20px;
+            padding-top: 10px;
+            border-top: 1px solid #ccc;
+            font-size: 9pt;
+            color: #666;
+        }
+        .codes {
+            font-size: 9pt;
+            color: #666;
+            margin-top: 10px;
+        }
+        .page-break {
+            page-break-before: always;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="facility-name">{{ report.facility }}</div>
+        <div class="report-title">Laboratory Report</div>
+    </div>
+
+    <div class="info-grid">
+        <div class="info-row">
+            <div class="info-cell"><span class="label">Patient Name:</span> {{ patient.first_name }} {{ patient.last_name }}</div>
+            <div class="info-cell"><span class="label">Date of Birth:</span> {{ patient.date_of_birth }}</div>
+        </div>
+        <div class="info-row">
+            <div class="info-cell"><span class="label">MRN:</span> {{ patient.mrn }}</div>
+            <div class="info-cell"><span class="label">Collection Date:</span> {{ report.date }}</div>
+        </div>
+        <div class="info-row">
+            <div class="info-cell"><span class="label">Ordering Provider:</span> {{ reviewer.first_name }} {{ reviewer.last_name }}{% if reviewer.npi %} (NPI: {{ reviewer.npi }}){% endif %}</div>
+            <div class="info-cell"><span class="label">Collection Time:</span> {{ collection_time }}</div>
+        </div>
+        <div class="info-row">
+            <div class="info-cell"><span class="label">Specimen Type:</span> {{ specimen_type }}</div>
+            <div class="info-cell"><span class="label">Report Date:</span> {{ report.date }}</div>
+        </div>
+    </div>
+
+    <div class="section-title">{{ panel_names }}</div>
+
+    <table class="results">
+        <thead>
+            <tr>
+                <th>Test Name</th>
+                <th>Result</th>
+                <th>Units</th>
+                <th>Reference Range</th>
+                <th>Flag</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for test in tests[:8] %}
+            <tr>
+                <td>{{ test.name }}</td>
+                <td>{{ test.value }}</td>
+                <td>{{ test.unit }}</td>
+                <td>{{ test.range }}</td>
+                <td class="{% if test.flag == 'H' %}flag-high{% elif test.flag == 'L' %}flag-low{% endif %}">{{ test.flag }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    {% if pages == 2 and tests|length > 8 %}
+    <div class="page-break"></div>
+
+    <div class="header">
+        <div class="facility-name">{{ report.facility }}</div>
+        <div class="report-title">Laboratory Report (Continued)</div>
+    </div>
+
+    <div class="info-grid">
+        <div class="info-row">
+            <div class="info-cell"><span class="label">Patient Name:</span> {{ patient.first_name }} {{ patient.last_name }}</div>
+            <div class="info-cell"><span class="label">Date of Birth:</span> {{ patient.date_of_birth }}</div>
+        </div>
+    </div>
+
+    <div class="section-title">Comprehensive Metabolic Panel</div>
+
+    <table class="results">
+        <thead>
+            <tr>
+                <th>Test Name</th>
+                <th>Result</th>
+                <th>Units</th>
+                <th>Reference Range</th>
+                <th>Flag</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for test in tests[8:] %}
+            <tr>
+                <td>{{ test.name }}</td>
+                <td>{{ test.value }}</td>
+                <td>{{ test.unit }}</td>
+                <td>{{ test.range }}</td>
+                <td class="{% if test.flag == 'H' %}flag-high{% elif test.flag == 'L' %}flag-low{% endif %}">{{ test.flag }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% endif %}
+
+    <div class="codes">
+        <strong>LOINC Codes:</strong> {{ loinc_codes }}
+    </div>
+
+    <div class="footer">
+        <p><strong>Reviewed by:</strong> {{ reviewer.first_name }} {{ reviewer.last_name }}, MD</p>
+        <p>This report contains confidential medical information. Results should be interpreted in conjunction with clinical findings.</p>
+    </div>
+</body>
+</html>

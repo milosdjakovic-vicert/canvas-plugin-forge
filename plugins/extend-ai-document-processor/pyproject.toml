@@ -1,0 +1,16 @@
+[project]
+authors = [
+  {email = "engineering@vicert.com", name = "Vicert"}
+]
+dependencies = [
+  "canvas[test-utils]",
+]
+description = "Process documents using Extend.ai for automated data extraction in Canvas Data Integration."
+license = "MIT"
+name = "extend-ai-document-processor"
+readme = "extend_ai_document_processor/README.md"
+requires-python = ">=3.11"
+version = "0.1.0"
+
+[tool.pytest.ini_options]
+python_files = ["*_tests.py", "test_*.py", "tests.py"]

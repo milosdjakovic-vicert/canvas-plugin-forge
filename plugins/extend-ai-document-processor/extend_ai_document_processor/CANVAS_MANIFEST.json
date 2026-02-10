@@ -1,0 +1,37 @@
+{
+    "sdk_version": "0.1.4",
+    "plugin_version": "0.0.1",
+    "name": "extend_ai_document_processor",
+    "description": "Process documents using Extend.ai for automated data extraction.",
+    "components": {
+        "protocols": [
+            {
+                "class": "extend_ai_document_processor.protocols.document_processor:DocumentProcessor",
+                "description": "Processes incoming documents using Extend.ai LLM extraction.",
+                "data_access": {
+                    "event": "read",
+                    "read": ["integration_tasks", "patients", "staff", "teams"],
+                    "write": ["integration_tasks"]
+                },
+                "meta": {
+                    "RESPONDS_TO": [
+                        "DOCUMENT_RECEIVED"
+                    ]
+                }
+            }
+        ],
+        "commands": [],
+        "content": [],
+        "effects": [],
+        "views": []
+    },
+    "secrets": [
+        "EXTEND_AI_API_KEY",
+        "EXTEND_AI_PROCESSOR_ID"
+    ],
+    "tags": ["data-integration", "extend-ai"],
+    "references": [],
+    "license": "MIT",
+    "diagram": false,
+    "readme": "./README.md"
+}

@@ -1,0 +1,677 @@
+{% autoescape off %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Weight Loss Chart</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.6/dist/chart.umd.min.js"></script>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background: #f8f9fa;
+            color: #212529;
+            padding: 16px;
+            font-size: 14px;
+            line-height: 1.5;
+        }
+
+        /* Patient Header */
+        .patient-header {
+            background: #fff;
+            border: 1px solid #dee2e6;
+            border-radius: 8px;
+            padding: 16px;
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        .patient-header h1 { font-size: 18px; font-weight: 600; }
+        .patient-header .badge {
+            background: #e8f5e9;
+            color: #2e7d32;
+            padding: 2px 10px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 500;
+        }
+
+        /* Sections */
+        .section {
+            background: #fff;
+            border: 1px solid #dee2e6;
+            border-radius: 8px;
+            padding: 16px;
+            margin-bottom: 16px;
+        }
+        .section h2 {
+            font-size: 15px;
+            font-weight: 600;
+            color: #495057;
+            margin-bottom: 12px;
+            padding-bottom: 8px;
+            border-bottom: 2px solid #e9ecef;
+        }
+
+        /* Form elements */
+        .form-row {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 12px;
+            flex-wrap: wrap;
+        }
+        .form-group {
+            flex: 1;
+            min-width: 120px;
+        }
+        .form-group label {
+            display: block;
+            font-size: 12px;
+            font-weight: 500;
+            color: #6c757d;
+            margin-bottom: 4px;
+        }
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 8px 10px;
+            border: 1px solid #ced4da;
+            border-radius: 6px;
+            font-size: 13px;
+            color: #212529;
+            background: #fff;
+            transition: border-color 0.15s;
+        }
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: #4dabf7;
+            box-shadow: 0 0 0 3px rgba(77, 171, 247, 0.15);
+        }
+        .form-group textarea { resize: vertical; min-height: 60px; }
+        .computed {
+            padding: 8px 10px;
+            background: #f1f3f5;
+            border: 1px solid #dee2e6;
+            border-radius: 6px;
+            font-size: 13px;
+            color: #495057;
+            min-height: 34px;
+            display: flex;
+            align-items: center;
+        }
+
+        /* Buttons */
+        .btn {
+            padding: 8px 20px;
+            border: none;
+            border-radius: 6px;
+            font-size: 13px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background 0.15s;
+        }
+        .btn-primary { background: #4dabf7; color: #fff; }
+        .btn-primary:hover { background: #339af0; }
+        .btn-primary:disabled { background: #adb5bd; cursor: not-allowed; }
+        .btn-secondary { background: #e9ecef; color: #495057; }
+        .btn-secondary:hover { background: #dee2e6; }
+        .btn-sm { padding: 5px 12px; font-size: 12px; }
+
+        /* Chart container */
+        .chart-container {
+            position: relative;
+            width: 100%;
+            height: 220px;
+            margin-bottom: 12px;
+        }
+
+        /* Goals list */
+        .goal-item {
+            padding: 10px;
+            border: 1px solid #e9ecef;
+            border-radius: 6px;
+            margin-bottom: 8px;
+            background: #f8f9fa;
+        }
+        .goal-item .goal-statement { font-weight: 500; margin-bottom: 4px; }
+        .goal-item .goal-meta { font-size: 12px; color: #6c757d; }
+
+        /* Condition assessment cards */
+        .condition-card {
+            padding: 12px;
+            border: 1px solid #e9ecef;
+            border-radius: 6px;
+            margin-bottom: 12px;
+        }
+        .condition-card .condition-title {
+            font-weight: 500;
+            font-size: 13px;
+            margin-bottom: 8px;
+            color: #495057;
+        }
+
+        /* Empty state */
+        .empty-state {
+            text-align: center;
+            color: #adb5bd;
+            padding: 16px;
+            font-style: italic;
+        }
+
+        /* Toast notifications */
+        .toast-container {
+            position: fixed;
+            top: 16px;
+            right: 16px;
+            z-index: 1000;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        .toast {
+            padding: 10px 16px;
+            border-radius: 6px;
+            font-size: 13px;
+            color: #fff;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+            animation: slideIn 0.3s ease;
+        }
+        .toast-success { background: #40c057; }
+        .toast-error { background: #fa5252; }
+        @keyframes slideIn {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+
+        /* Review banner */
+        .review-banner {
+            background: #fff3cd;
+            border: 1px solid #ffc107;
+            border-radius: 8px;
+            padding: 12px 16px;
+            text-align: center;
+            font-size: 13px;
+            color: #856404;
+        }
+
+        /* Section divider */
+        .section-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 8px;
+            margin-top: 12px;
+            padding-top: 12px;
+            border-top: 1px solid #e9ecef;
+        }
+    </style>
+</head>
+<body>
+    <div class="toast-container" id="toastContainer"></div>
+
+    <!-- Patient Header -->
+    <div class="patient-header">
+        <h1>{{ patient_name }}</h1>
+        <span class="badge">Weight Loss Visit</span>
+    </div>
+
+    <!-- ====== VITALS SECTION ====== -->
+    <div class="section">
+        <h2>Vitals</h2>
+        <form id="vitalsForm">
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="weightLbs">Weight (lbs)</label>
+                    <input type="number" id="weightLbs" min="1" max="1500" step="1"
+                           placeholder="e.g. 185" oninput="calcBMI()">
+                </div>
+                <div class="form-group">
+                    <label for="heightIn">Height (inches)</label>
+                    <input type="number" id="heightIn" min="10" max="108" step="1"
+                           placeholder="e.g. 70" oninput="calcBMI()">
+                </div>
+                <div class="form-group">
+                    <label>BMI</label>
+                    <div class="computed" id="bmiDisplay">—</div>
+                </div>
+            </div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="bpSystole">BP Systolic</label>
+                    <input type="number" id="bpSystole" min="30" max="305"
+                           placeholder="e.g. 120">
+                </div>
+                <div class="form-group">
+                    <label for="bpDiastole">BP Diastolic</label>
+                    <input type="number" id="bpDiastole" min="20" max="180"
+                           placeholder="e.g. 80">
+                </div>
+                <div class="form-group">
+                    <label for="waistCirc">Waist Circ. (in)</label>
+                    <input type="number" id="waistCirc" min="20" max="200"
+                           placeholder="e.g. 36">
+                </div>
+            </div>
+            <div class="section-actions">
+                <button type="submit" class="btn btn-primary" id="vitalsSubmit">
+                    Add Vitals Draft
+                </button>
+            </div>
+        </form>
+    </div>
+
+    <!-- ====== WEIGHT TREND CHART ====== -->
+    <div class="section">
+        <h2>Weight Trend</h2>
+        <div class="chart-container">
+            <canvas id="weightChart"></canvas>
+        </div>
+        <div id="chartEmpty" class="empty-state" style="display:none;">
+            No weight history available.
+        </div>
+    </div>
+
+    <!-- ====== GOALS SECTION ====== -->
+    <div class="section">
+        <h2>Goals</h2>
+        <div id="existingGoals"></div>
+        <details style="margin-top:12px;">
+            <summary style="cursor:pointer; font-size:13px; font-weight:500; color:#4dabf7;">
+                + Create New Goal
+            </summary>
+            <form id="goalForm" style="margin-top:12px;">
+                <div class="form-row">
+                    <div class="form-group" style="flex:3;">
+                        <label for="goalStatement">Goal Statement</label>
+                        <input type="text" id="goalStatement"
+                               placeholder="e.g. Lose 10 lbs in 3 months">
+                    </div>
+                    <div class="form-group">
+                        <label for="goalPriority">Priority</label>
+                        <select id="goalPriority">
+                            <option value="">—</option>
+                            <option value="high-priority">High</option>
+                            <option value="medium-priority">Medium</option>
+                            <option value="low-priority">Low</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="goalStart">Start Date</label>
+                        <input type="date" id="goalStart">
+                    </div>
+                    <div class="form-group">
+                        <label for="goalDue">Due Date</label>
+                        <input type="date" id="goalDue">
+                    </div>
+                    <div class="form-group">
+                        <label for="goalAchievement">Achievement Status</label>
+                        <select id="goalAchievement">
+                            <option value="">—</option>
+                            <option value="in-progress">In Progress</option>
+                            <option value="improving">Improving</option>
+                            <option value="worsening">Worsening</option>
+                            <option value="no-change">No Change</option>
+                            <option value="achieved">Achieved</option>
+                            <option value="sustaining">Sustaining</option>
+                            <option value="not-achieved">Not Achieved</option>
+                            <option value="no-progress">No Progress</option>
+                            <option value="not-attainable">Not Attainable</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="section-actions">
+                    <button type="submit" class="btn btn-primary">Add Goal Draft</button>
+                </div>
+            </form>
+        </details>
+    </div>
+
+    <!-- ====== ASSESSMENT SECTION ====== -->
+    <div class="section">
+        <h2>Assessment</h2>
+        <div id="conditionAssessments"></div>
+        <div id="assessEmpty" class="empty-state" style="display:none;">
+            No active weight-related conditions (E66.*) found.
+        </div>
+    </div>
+
+    <!-- ====== PLAN SECTION ====== -->
+    <div class="section">
+        <h2>Plan</h2>
+        <form id="planForm">
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="planDiet">Diet Recommendations</label>
+                    <textarea id="planDiet" rows="2"
+                              placeholder="e.g. Caloric deficit of 500 kcal/day, increase protein intake..."></textarea>
+                </div>
+            </div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="planExercise">Exercise Plan</label>
+                    <textarea id="planExercise" rows="2"
+                              placeholder="e.g. 150 min/week moderate aerobic activity..."></textarea>
+                </div>
+            </div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="planMedications">Medications</label>
+                    <textarea id="planMedications" rows="2"
+                              placeholder="e.g. Continue metformin 500mg BID..."></textarea>
+                </div>
+            </div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="planFollowUp">Follow-Up</label>
+                    <textarea id="planFollowUp" rows="2"
+                              placeholder="e.g. Follow up in 4 weeks, recheck weight and labs..."></textarea>
+                </div>
+            </div>
+            <div class="section-actions">
+                <button type="submit" class="btn btn-primary">Add Plan Draft</button>
+            </div>
+        </form>
+    </div>
+
+    <!-- Review Banner -->
+    <div class="review-banner">
+        All commands are added as <strong>uncommitted drafts</strong>.
+        Please review all drafts in the note before signing.
+    </div>
+
+    <input type="hidden" id="noteId" value="{{ note_id }}">
+    <input type="hidden" id="patientId" value="{{ patient_id }}">
+
+    <script>
+        const NOTE_ID = document.getElementById('noteId').value;
+        const PATIENT_ID = document.getElementById('patientId').value;
+        const API_BASE = '/plugin-io/api/weight_loss_charting';
+
+        // ---- Toast Notifications ----
+        function showToast(message, type) {
+            const container = document.getElementById('toastContainer');
+            const toast = document.createElement('div');
+            toast.className = 'toast toast-' + type;
+            toast.textContent = message;
+            container.appendChild(toast);
+            setTimeout(() => toast.remove(), 4000);
+        }
+
+        // ---- BMI Calculation ----
+        function calcBMI() {
+            const w = parseFloat(document.getElementById('weightLbs').value);
+            const h = parseFloat(document.getElementById('heightIn').value);
+            const el = document.getElementById('bmiDisplay');
+            if (w > 0 && h > 0) {
+                const bmi = ((w / (h * h)) * 703).toFixed(1);
+                let category = '';
+                if (bmi < 18.5) category = 'Underweight';
+                else if (bmi < 25) category = 'Normal';
+                else if (bmi < 30) category = 'Overweight';
+                else category = 'Obese';
+                el.textContent = bmi + ' (' + category + ')';
+                el.style.color = bmi >= 30 ? '#e03131' : bmi >= 25 ? '#e67700' : '#2b8a3e';
+            } else {
+                el.textContent = '\u2014';
+                el.style.color = '#495057';
+            }
+        }
+
+        // ---- API Helper ----
+        async function apiPost(endpoint, body) {
+            const resp = await fetch(API_BASE + endpoint, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(body),
+            });
+            if (!resp.ok) {
+                const err = await resp.json().catch(() => ({}));
+                throw new Error(err.error || 'Request failed');
+            }
+            return resp.json();
+        }
+
+        // ---- Vitals Form ----
+        document.getElementById('vitalsForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const btn = document.getElementById('vitalsSubmit');
+            btn.disabled = true;
+            try {
+                const body = { note_id: NOTE_ID };
+                const w = document.getElementById('weightLbs').value;
+                const h = document.getElementById('heightIn').value;
+                const sys = document.getElementById('bpSystole').value;
+                const dia = document.getElementById('bpDiastole').value;
+                const waist = document.getElementById('waistCirc').value;
+                if (w) body.weight_lbs = parseInt(w, 10);
+                if (h) body.height = parseInt(h, 10);
+                if (sys) body.blood_pressure_systole = parseInt(sys, 10);
+                if (dia) body.blood_pressure_diastole = parseInt(dia, 10);
+                if (waist) body.waist_circumference = parseInt(waist, 10);
+
+                if (!body.weight_lbs && !body.height && !body.blood_pressure_systole && !body.waist_circumference) {
+                    showToast('Enter at least one vital sign', 'error');
+                    return;
+                }
+                await apiPost('/vitals', body);
+                showToast('Vitals draft added to note', 'success');
+            } catch (err) {
+                showToast('Error: ' + err.message, 'error');
+            } finally {
+                btn.disabled = false;
+            }
+        });
+
+        // ---- Weight Trend Chart ----
+        (function initChart() {
+            const weightData = {{ weight_history_json }};
+            if (!weightData.length) {
+                document.getElementById('chartEmpty').style.display = 'block';
+                document.getElementById('weightChart').style.display = 'none';
+                return;
+            }
+            const ctx = document.getElementById('weightChart').getContext('2d');
+            new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: weightData.map(d => d.date),
+                    datasets: [{
+                        label: 'Weight (lbs)',
+                        data: weightData.map(d => d.lbs),
+                        borderColor: '#4dabf7',
+                        backgroundColor: 'rgba(77, 171, 247, 0.1)',
+                        borderWidth: 2,
+                        tension: 0.3,
+                        fill: true,
+                        pointRadius: 4,
+                        pointBackgroundColor: '#4dabf7',
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: {
+                            callbacks: {
+                                label: (ctx) => ctx.parsed.y + ' lbs'
+                            }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            grid: { display: false },
+                            ticks: { maxRotation: 45, font: { size: 11 } }
+                        },
+                        y: {
+                            title: { display: true, text: 'Weight (lbs)', font: { size: 12 } },
+                            ticks: { font: { size: 11 } }
+                        }
+                    }
+                }
+            });
+        })();
+
+        // ---- Goals List ----
+        (function initGoals() {
+            const goals = {{ goals_json }};
+            const container = document.getElementById('existingGoals');
+            if (!goals.length) {
+                container.innerHTML = '<p class="empty-state">No existing goals for this patient.</p>';
+                return;
+            }
+            goals.forEach(g => {
+                const div = document.createElement('div');
+                div.className = 'goal-item';
+                const meta = [];
+                if (g.priority) meta.push('Priority: ' + g.priority.replace('-priority', ''));
+                if (g.achievement_status) meta.push('Status: ' + g.achievement_status);
+                if (g.due_date) meta.push('Due: ' + g.due_date);
+                div.innerHTML =
+                    '<div class="goal-statement">' + escHtml(g.statement) + '</div>' +
+                    '<div class="goal-meta">' + escHtml(meta.join(' \u00B7 ')) + '</div>';
+                container.appendChild(div);
+            });
+        })();
+
+        // ---- Goal Form ----
+        document.getElementById('goalForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const stmt = document.getElementById('goalStatement').value.trim();
+            if (!stmt) {
+                showToast('Goal statement is required', 'error');
+                return;
+            }
+            const body = {
+                note_id: NOTE_ID,
+                goal_statement: stmt,
+            };
+            const start = document.getElementById('goalStart').value;
+            const due = document.getElementById('goalDue').value;
+            const pri = document.getElementById('goalPriority').value;
+            const ach = document.getElementById('goalAchievement').value;
+            if (start) body.start_date = start;
+            if (due) body.due_date = due;
+            if (pri) body.priority = pri;
+            if (ach) body.achievement_status = ach;
+
+            try {
+                await apiPost('/goal', body);
+                showToast('Goal draft added to note', 'success');
+                document.getElementById('goalForm').reset();
+            } catch (err) {
+                showToast('Error: ' + err.message, 'error');
+            }
+        });
+
+        // ---- Condition Assessments ----
+        (function initConditions() {
+            const conditions = {{ conditions_json }};
+            const container = document.getElementById('conditionAssessments');
+            if (!conditions.length) {
+                document.getElementById('assessEmpty').style.display = 'block';
+                return;
+            }
+            conditions.forEach((cond, idx) => {
+                const card = document.createElement('div');
+                card.className = 'condition-card';
+                card.innerHTML =
+                    '<div class="condition-title">' + escHtml(cond.display) + '</div>' +
+                    (cond.onset_date ? '<div style="font-size:12px;color:#6c757d;margin-bottom:8px;">Onset: ' + escHtml(cond.onset_date) + '</div>' : '') +
+                    '<div class="form-row">' +
+                        '<div class="form-group">' +
+                            '<label>Status</label>' +
+                            '<select class="assess-status" data-idx="' + idx + '">' +
+                                '<option value="">—</option>' +
+                                '<option value="improved">Improved</option>' +
+                                '<option value="stable">Stable</option>' +
+                                '<option value="deteriorated">Deteriorated</option>' +
+                            '</select>' +
+                        '</div>' +
+                        '<div class="form-group" style="flex:2;">' +
+                            '<label>Narrative</label>' +
+                            '<input type="text" class="assess-narrative" data-idx="' + idx + '" placeholder="Assessment notes...">' +
+                        '</div>' +
+                    '</div>' +
+                    '<div class="form-row">' +
+                        '<div class="form-group">' +
+                            '<label>Background</label>' +
+                            '<input type="text" class="assess-background" data-idx="' + idx + '" placeholder="Relevant history...">' +
+                        '</div>' +
+                    '</div>' +
+                    '<div class="section-actions">' +
+                        '<button type="button" class="btn btn-primary btn-sm assess-submit" data-condition-id="' + cond.id + '" data-idx="' + idx + '">Add Assessment Draft</button>' +
+                    '</div>';
+                container.appendChild(card);
+            });
+
+            container.addEventListener('click', async (e) => {
+                const btn = e.target.closest('.assess-submit');
+                if (!btn) return;
+                btn.disabled = true;
+                const idx = btn.dataset.idx;
+                const condId = btn.dataset.conditionId;
+                const status = container.querySelector('.assess-status[data-idx="' + idx + '"]').value;
+                const narrative = container.querySelector('.assess-narrative[data-idx="' + idx + '"]').value.trim();
+                const background = container.querySelector('.assess-background[data-idx="' + idx + '"]').value.trim();
+
+                const body = { note_id: NOTE_ID, condition_id: condId };
+                if (status) body.status = status;
+                if (narrative) body.narrative = narrative;
+                if (background) body.background = background;
+
+                try {
+                    await apiPost('/assess', body);
+                    showToast('Assessment draft added to note', 'success');
+                } catch (err) {
+                    showToast('Error: ' + err.message, 'error');
+                } finally {
+                    btn.disabled = false;
+                }
+            });
+        })();
+
+        // ---- Plan Form ----
+        document.getElementById('planForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const diet = document.getElementById('planDiet').value.trim();
+            const exercise = document.getElementById('planExercise').value.trim();
+            const meds = document.getElementById('planMedications').value.trim();
+            const followUp = document.getElementById('planFollowUp').value.trim();
+
+            const parts = [];
+            if (diet) parts.push('Diet: ' + diet);
+            if (exercise) parts.push('Exercise: ' + exercise);
+            if (meds) parts.push('Medications: ' + meds);
+            if (followUp) parts.push('Follow-up: ' + followUp);
+
+            if (!parts.length) {
+                showToast('Enter at least one plan section', 'error');
+                return;
+            }
+
+            const narrative = parts.join('\n\n');
+            try {
+                await apiPost('/plan', { note_id: NOTE_ID, narrative: narrative });
+                showToast('Plan draft added to note', 'success');
+            } catch (err) {
+                showToast('Error: ' + err.message, 'error');
+            }
+        });
+
+        // ---- Utility ----
+        function escHtml(str) {
+            const div = document.createElement('div');
+            div.textContent = str;
+            return div.innerHTML;
+        }
+    </script>
+</body>
+</html>
+{% endautoescape %}

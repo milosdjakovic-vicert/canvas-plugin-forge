@@ -11,9 +11,3 @@ wheels/
 
 # OS
 .DS_Store
-
-# Plugins (each plugin manages its own repo)
-/plugins/
-
-# CPA workflow artifacts
-.cpa-workflow-artifacts/

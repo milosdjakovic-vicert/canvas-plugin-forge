@@ -1,9 +1,0 @@
-[project]
-name = "plugin-forge"
-version = "0.1.0"
-description = "Canvas plugin development workspace"
-readme = "README.md"
-requires-python = ">=3.12"
-dependencies = [
-    "canvas>=0.91.0",
-]

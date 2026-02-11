@@ -1,24 +1,36 @@
 {
   "created_date": "2026-02-11T15:42:13.387914+00:00",
-  "last_update": "2026-02-11T15:42:13.387914+00:00",
-  "session_count": 1,
+  "last_update": "2026-02-11T16:53:16.902317+00:00",
+  "session_count": 3,
   "total_tokens": {
-    "input": 192,
-    "output": 7090,
-    "total": 7282
+    "input": 485,
+    "output": 28051,
+    "total": 28536
   },
   "cache_usage": {
-    "cache_write": 249111,
-    "cache_read": 7526530
+    "cache_write": 531235,
+    "cache_read": 18235838
   },
-  "cost_usd": 16.4953,
-  "cost_formatted": "$16.4953",
+  "cost_usd": 39.4255,
+  "cost_formatted": "$39.4255",
   "sessions": [
     {
       "session_id": "ec72ba1c-1a66-460a-9030-ed055dba0367",
       "date": "2026-02-11T15:42:13.377441+00:00",
       "duration": "5h 25m 54s",
       "cost_usd": 16.495256
+    },
+    {
+      "session_id": "4d8611b2-b731-4e02-a252-a55e01d9b765",
+      "date": "2026-02-11T16:23:34.589977+00:00",
+      "duration": "40m 11s",
+      "cost_usd": 10.311203
+    },
+    {
+      "session_id": "86e70a81-6c8d-4f6e-8beb-3ff0367817b9",
+      "date": "2026-02-11T16:53:16.895118+00:00",
+      "duration": "28m 44s",
+      "cost_usd": 12.619054
     }
   ]
 }

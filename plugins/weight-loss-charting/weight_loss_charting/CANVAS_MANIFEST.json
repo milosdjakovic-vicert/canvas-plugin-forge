@@ -1,5 +1,5 @@
 {
-    "sdk_version": "0.1.4",
+    "sdk_version": "0.97.0",
     "plugin_version": "0.0.1",
     "name": "weight_loss_charting",
     "description": "Weight loss visit charting with vitals, weight trends, goals, assessment, and plan narrative.",

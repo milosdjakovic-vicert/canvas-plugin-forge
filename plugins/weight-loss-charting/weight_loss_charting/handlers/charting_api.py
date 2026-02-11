@@ -1,6 +1,7 @@
 import json
 from datetime import date
 from http import HTTPStatus
+from typing import Any
 
 from canvas_sdk.commands.commands.assess import AssessCommand
 from canvas_sdk.commands.commands.goal import GoalCommand
@@ -128,7 +129,7 @@ class WeightLossChartingAPI(StaffSessionAuthMixin, SimpleAPI):
             return [JSONResponse({"error": "note_id is required"}, status_code=HTTPStatus.BAD_REQUEST)]
 
         note_uuid = self._get_note_uuid(note_id)
-        kwargs = {"note_uuid": note_uuid}
+        kwargs: dict[str, Any] = {"note_uuid": note_uuid}
 
         if data.get("weight_lbs"):
             kwargs["weight_lbs"] = int(data["weight_lbs"])

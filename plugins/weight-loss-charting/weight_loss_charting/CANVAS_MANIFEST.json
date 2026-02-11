@@ -32,7 +32,7 @@
     "secrets": [],
     "tags": ["weight-loss", "charting", "vitals"],
     "references": [],
-    "license": "MIT",
+    "license": "",
     "diagram": false,
     "readme": "./README.md"
 }

@@ -9,5 +9,8 @@ wheels/
 # Virtual environments
 .venv
 
+# Coverage
+.coverage
+
 # OS
 .DS_Store

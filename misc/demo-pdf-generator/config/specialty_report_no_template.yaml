@@ -1,0 +1,23 @@
+# Specialty Report - No Template Match Scenario
+# Patient: Katalina Perrelli (exists in DB)
+# Reviewer: Steven Magee (exists in DB - direct match)
+# Templates: Sleep study consultation - rare, no template match
+# Pages: 1
+
+patient:
+  first_name: "Katalina"
+  last_name: "Perrelli"
+  date_of_birth: "1985-12-23"
+  mrn: "493261453"
+
+reviewer:
+  first_name: "Steven"
+  last_name: "Magee"
+  npi: ""
+
+report:
+  type: "specialty_report"
+  date: "2026-02-03"
+  facility: "Canvas Sleep Medicine Center"
+
+pages: 1

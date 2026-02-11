@@ -1,0 +1,22 @@
+[project]
+name = "demo-pdf-generator"
+version = "0.1.0"
+description = "Generate test PDF documents for extend-ai-document-processor demo"
+requires-python = ">=3.11"
+dependencies = [
+    "fpdf2>=2.7",
+    "pyyaml>=6.0",
+    "pydantic>=2.0",
+    "click>=8.0",
+]
+
+[project.scripts]
+generate-pdf = "demo_pdf_generator.cli:generate_pdf"
+generate-all-demo-pdfs = "demo_pdf_generator.cli:generate_all"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/demo_pdf_generator"]

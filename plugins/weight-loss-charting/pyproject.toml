@@ -1,0 +1,16 @@
+[project]
+authors = [
+  {email = "engineering@vicert.com", name = "Vicert"}
+]
+dependencies = [
+  "canvas[test-utils]",
+]
+description = "Weight loss visit charting plugin with vitals entry, weight trends, goal tracking, assessment, and plan narrative."
+license = "MIT"
+name = "weight-loss-charting"
+readme = "weight_loss_charting/README.md"
+requires-python = ">=3.11"
+version = "0.1.0"
+
+[tool.pytest.ini_options]
+python_files = ["*_tests.py", "test_*.py", "tests.py"]

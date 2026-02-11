@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <style>
+        @page {
+            size: letter;
+            margin: 0.75in;
+        }
+        body {
+            font-family: Arial, sans-serif;
+            font-size: 10pt;
+            line-height: 1.5;
+            color: #333;
+        }
+        .header {
+            border-bottom: 2px solid #7b1fa2;
+            padding-bottom: 10px;
+            margin-bottom: 15px;
+        }
+        .facility-name {
+            font-size: 16pt;
+            font-weight: bold;
+            color: #7b1fa2;
+        }
+        .report-title {
+            font-size: 14pt;
+            font-weight: bold;
+            margin-top: 5px;
+        }
+        .specialty-badge {
+            display: inline-block;
+            background-color: #7b1fa2;
+            color: white;
+            padding: 3px 10px;
+            border-radius: 3px;
+            font-size: 9pt;
+            margin-top: 5px;
+        }
+        .info-grid {
+            display: table;
+            width: 100%;
+            margin-bottom: 15px;
+            background-color: #faf5fc;
+            padding: 10px;
+            border: 1px solid #e1bee7;
+        }
+        .info-row {
+            display: table-row;
+        }
+        .info-cell {
+            display: table-cell;
+            padding: 4px 15px 4px 0;
+        }
+        .label {
+            font-weight: bold;
+            color: #555;
+        }
+        .section-title {
+            font-size: 11pt;
+            font-weight: bold;
+            color: #7b1fa2;
+            margin: 20px 0 8px 0;
+            border-bottom: 1px solid #ce93d8;
+            padding-bottom: 3px;
+        }
+        .content {
+            margin-left: 10px;
+            white-space: pre-line;
+        }
+        .assessment-box {
+            background-color: #f3e5f5;
+            border-left: 4px solid #7b1fa2;
+            padding: 10px 15px;
+            margin-top: 15px;
+        }
+        .assessment-title {
+            font-weight: bold;
+            color: #7b1fa2;
+            margin-bottom: 5px;
+        }
+        .recommendations-box {
+            background-color: #fff;
+            border: 2px solid #7b1fa2;
+            padding: 10px 15px;
+            margin-top: 15px;
+        }
+        .recommendations-title {
+            font-weight: bold;
+            color: #7b1fa2;
+            margin-bottom: 5px;
+        }
+        .footer {
+            margin-top: 30px;
+            padding-top: 10px;
+            border-top: 1px solid #ccc;
+            font-size: 9pt;
+            color: #666;
+        }
+        .codes {
+            font-size: 9pt;
+            color: #666;
+            margin-top: 15px;
+        }
+        .signature-line {
+            margin-top: 20px;
+            border-top: 1px solid #333;
+            width: 250px;
+            padding-top: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="facility-name">{{ report.facility }}</div>
+        <div class="report-title">{{ study_name }}</div>
+        <div class="specialty-badge">{{ specialty }}</div>
+    </div>
+
+    <div class="info-grid">
+        <div class="info-row">
+            <div class="info-cell"><span class="label">Patient Name:</span> {{ patient.first_name }} {{ patient.last_name }}</div>
+            <div class="info-cell"><span class="label">Date of Birth:</span> {{ patient.date_of_birth }}</div>
+        </div>
+        <div class="info-row">
+            <div class="info-cell"><span class="label">MRN:</span> {{ patient.mrn }}</div>
+            <div class="info-cell"><span class="label">Consultation Date:</span> {{ report.date }}</div>
+        </div>
+        <div class="info-row">
+            <div class="info-cell"><span class="label">Consulting Physician:</span> {{ reviewer.first_name }} {{ reviewer.last_name }}{% if reviewer.npi %} (NPI: {{ reviewer.npi }}){% endif %}</div>
+            <div class="info-cell"><span class="label">Report Date:</span> {{ report.date }}</div>
+        </div>
+    </div>
+
+    <div class="section-title">Reason for Referral</div>
+    <div class="content">{{ reason_for_referral }}</div>
+
+    <div class="section-title">History and Examination</div>
+    <div class="content">{{ history }}</div>
+
+    <div class="assessment-box">
+        <div class="assessment-title">ASSESSMENT</div>
+        <div class="content">{{ assessment }}</div>
+    </div>
+
+    <div class="recommendations-box">
+        <div class="recommendations-title">RECOMMENDATIONS</div>
+        <div class="content">{{ recommendations }}</div>
+    </div>
+
+    <div class="codes">
+        <strong>SNOMED Code:</strong> {{ snomed_code }}
+    </div>
+
+    <div class="footer">
+        <div class="signature-line">
+            {{ reviewer.first_name }} {{ reviewer.last_name }}, MD<br>
+            {{ specialty }} Specialist
+        </div>
+        <p style="margin-top: 15px;">This consultation report has been electronically signed.</p>
+        <p>Please contact our office at (555) 123-4567 if you have questions regarding this consultation.</p>
+    </div>
+</body>
+</html>

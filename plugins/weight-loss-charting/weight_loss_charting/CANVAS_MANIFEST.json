@@ -1,0 +1,38 @@
+{
+    "sdk_version": "0.97.0",
+    "plugin_version": "0.0.1",
+    "name": "weight_loss_charting",
+    "description": "Weight loss visit charting with vitals, weight trends, goals, assessment, and plan narrative.",
+    "components": {
+        "protocols": [
+            {
+                "class": "weight_loss_charting.handlers.chart_button:WeightLossChartButton",
+                "description": "Adds a Weight Loss Chart button to note headers.",
+                "data_access": {
+                    "event": "",
+                    "read": [],
+                    "write": []
+                }
+            },
+            {
+                "class": "weight_loss_charting.handlers.charting_api:WeightLossChartingAPI",
+                "description": "API serving the weight loss charting interface and handling command creation.",
+                "data_access": {
+                    "event": "",
+                    "read": ["v1.Patient", "v1.Observation", "v1.Goal", "v1.Condition"],
+                    "write": []
+                }
+            }
+        ],
+        "commands": [],
+        "content": [],
+        "effects": [],
+        "views": []
+    },
+    "secrets": [],
+    "tags": ["weight-loss", "charting", "vitals"],
+    "references": [],
+    "license": "MIT",
+    "diagram": false,
+    "readme": "./README.md"
+}

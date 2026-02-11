@@ -1,0 +1,43 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(uv run:*)",
+      "Bash(uv run pytest:*)",
+      "Bash(uv run python -m pytest:*)",
+      "Bash(python -m pytest:*)",
+      "Bash(canvas logs:*)",
+      "Bash(ls:*)",
+      "Bash(find:*)",
+      "Bash(grep:*)",
+      "Bash(cat:*)",
+      "Bash(head:*)",
+      "Bash(wc:*)",
+      "Bash(echo:*)",
+      "Bash(git add:*)",
+      "Bash(git log:*)",
+      "Bash(docker logs:*)",
+      "Bash(docker ps:*)",
+      "Bash(docker exec:*)",
+      "Bash(docker-compose logs:*)",
+      "Bash(docker-compose up:*)",
+      "Bash(docker-compose down:*)",
+      "Bash(docker-compose restart:*)",
+      "Bash(docker restart:*)",
+      "Bash(docker compose exec:*)",
+      "Bash(docker compose logs:*)",
+      "Bash(ruff check:*)",
+      "Bash(pre-commit run:*)",
+      "Bash(curl:*)",
+      "WebSearch",
+      "WebFetch(domain:docs.canvasmedical.com)",
+      "WebFetch(domain:hl7.org)",
+      "WebFetch(domain:www.hl7.org)",
+      "WebFetch(domain:build.fhir.org)",
+      "WebFetch(domain:docs.extend.ai)",
+      "WebFetch(domain:deepwiki.com)"
+    ]
+  },
+  "enabledPlugins": {
+    "cpa@canvas-medical": true
+  }
+}

@@ -1,0 +1,23 @@
+{
+    "sdk_version": "0.1.4",
+    "plugin_version": "0.0.1",
+    "name": "task_webhook",
+    "description": "Webhooks for task creation",
+    "components": {
+        "protocols": [
+            {
+                "class": "task_webhook.protocols.my_protocol:Protocol",
+                "description": "Hit an API when a task is created",
+                "data_access": {
+                    "event": "",
+                    "read": [],
+                    "write": []
+                }
+            }
+       ]
+    },
+    "secrets": ["WEBHOOK_ID", "AUTH_TOKEN"],
+    "tags": {},
+    "license": "",
+    "readme": "./README.md"
+}

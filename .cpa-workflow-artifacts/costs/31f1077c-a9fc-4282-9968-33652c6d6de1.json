@@ -1,0 +1,12 @@
+{
+  "session_id": "31f1077c-a9fc-4282-9968-33652c6d6de1",
+  "timestamp": "2026-02-11T15:11:57.041133+00:00",
+  "exit_reason": "prompt_input_exit",
+  "working_directory": "/Users/milos.djakovic/Development/vicert/canvas-medical/plugin-forge",
+  "transcript_path": "/Users/milos.djakovic/.claude/projects/-Users-milos-djakovic-Development-vicert-canvas-medical-plugin-forge/31f1077c-a9fc-4282-9968-33652c6d6de1.jsonl",
+  "cost_data": {
+    "message_count": 12,
+    "duration_seconds": 17061.86,
+    "duration_formatted": "4h 44m 21s"
+  }
+}

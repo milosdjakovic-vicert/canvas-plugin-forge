@@ -1,4 +1,5 @@
 import json
+from datetime import date
 from http import HTTPStatus
 
 from canvas_sdk.commands.commands.assess import AssessCommand
@@ -13,12 +14,18 @@ from canvas_sdk.templates import render_to_string
 from canvas_sdk.v1.data.condition import Condition
 from canvas_sdk.v1.data.goal import Goal
 from canvas_sdk.v1.data.observation import Observation
+from canvas_sdk.v1.data.note import Note
 from canvas_sdk.v1.data.patient import Patient
 from logger import log
 
 
 class WeightLossChartingAPI(StaffSessionAuthMixin, SimpleAPI):
     """API serving the weight loss charting interface and handling command creation."""
+
+    def _get_note_uuid(self, note_id: str) -> str:
+        """Resolve a note's integer dbid to its UUID."""
+        note = Note.objects.get(dbid=int(note_id))
+        return str(note.id)
 
     @get("/chart")
     def get_chart(self) -> list[Response | Effect]:
@@ -38,21 +45,19 @@ class WeightLossChartingAPI(StaffSessionAuthMixin, SimpleAPI):
         try:
             observations = (
                 Observation.objects.for_patient(patient_id)
-                .filter(category="vital-signs", deleted=False)
-                .exclude(name="Vital Signs Panel")
+                .filter(category="vital-signs", name="weight", deleted=False)
                 .order_by("effective_datetime")
             )
             for obs in observations:
-                if obs.name == "weight":
-                    try:
-                        oz_value = float(obs.value)
-                        lbs_value = round(oz_value / 16, 1)
-                        weight_history.append({
-                            "date": obs.effective_datetime.strftime("%Y-%m-%d"),
-                            "lbs": lbs_value,
-                        })
-                    except (ValueError, TypeError):
-                        continue
+                try:
+                    oz_value = float(obs.value)
+                    lbs_value = round(oz_value / 16, 1)
+                    weight_history.append({
+                        "date": obs.effective_datetime.strftime("%Y-%m-%d"),
+                        "lbs": lbs_value,
+                    })
+                except (ValueError, TypeError):
+                    continue
         except Exception:
             log.warning(f"Could not fetch weight history for patient {patient_id}")
 
@@ -79,6 +84,7 @@ class WeightLossChartingAPI(StaffSessionAuthMixin, SimpleAPI):
             conditions = (
                 Condition.objects.for_patient(patient_id)
                 .active()
+                .prefetch_related("codings")
             )
             for condition in conditions:
                 codings = condition.codings.all()
@@ -121,7 +127,8 @@ class WeightLossChartingAPI(StaffSessionAuthMixin, SimpleAPI):
         if not note_id:
             return [JSONResponse({"error": "note_id is required"}, status_code=HTTPStatus.BAD_REQUEST)]
 
-        kwargs = {"note_uuid": note_id}
+        note_uuid = self._get_note_uuid(note_id)
+        kwargs = {"note_uuid": note_uuid}
 
         if data.get("weight_lbs"):
             kwargs["weight_lbs"] = int(data["weight_lbs"])
@@ -149,19 +156,20 @@ class WeightLossChartingAPI(StaffSessionAuthMixin, SimpleAPI):
         if not note_id:
             return [JSONResponse({"error": "note_id is required"}, status_code=HTTPStatus.BAD_REQUEST)]
 
+        note_uuid = self._get_note_uuid(note_id)
         kwargs = {
-            "note_uuid": note_id,
+            "note_uuid": note_uuid,
             "goal_statement": data.get("goal_statement", ""),
         }
 
         if data.get("start_date"):
-            kwargs["start_date"] = data["start_date"]
+            kwargs["start_date"] = date.fromisoformat(data["start_date"])
         if data.get("due_date"):
-            kwargs["due_date"] = data["due_date"]
+            kwargs["due_date"] = date.fromisoformat(data["due_date"])
         if data.get("priority"):
-            kwargs["priority"] = data["priority"]
+            kwargs["priority"] = GoalCommand.Priority(data["priority"])
         if data.get("achievement_status"):
-            kwargs["achievement_status"] = data["achievement_status"]
+            kwargs["achievement_status"] = GoalCommand.AchievementStatus(data["achievement_status"])
 
         command = GoalCommand(**kwargs)
         return [JSONResponse({"status": "ok"}), command.originate()]
@@ -178,7 +186,8 @@ class WeightLossChartingAPI(StaffSessionAuthMixin, SimpleAPI):
         if not note_id:
             return [JSONResponse({"error": "note_id is required"}, status_code=HTTPStatus.BAD_REQUEST)]
 
-        kwargs = {"note_uuid": note_id}
+        note_uuid = self._get_note_uuid(note_id)
+        kwargs = {"note_uuid": note_uuid}
 
         if data.get("condition_id"):
             kwargs["condition_id"] = data["condition_id"]
@@ -204,8 +213,9 @@ class WeightLossChartingAPI(StaffSessionAuthMixin, SimpleAPI):
         if not note_id:
             return [JSONResponse({"error": "note_id is required"}, status_code=HTTPStatus.BAD_REQUEST)]
 
+        note_uuid = self._get_note_uuid(note_id)
         command = PlanCommand(
-            note_uuid=note_id,
+            note_uuid=note_uuid,
             narrative=data.get("narrative", ""),
         )
         return [JSONResponse({"status": "ok"}), command.originate()]

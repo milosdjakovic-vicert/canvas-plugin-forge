@@ -19,7 +19,7 @@
                 "description": "API serving the weight loss charting interface and handling command creation.",
                 "data_access": {
                     "event": "",
-                    "read": ["v1.Patient", "v1.Observation", "v1.Goal", "v1.Condition"],
+                    "read": ["v1.Patient", "v1.Observation", "v1.Goal", "v1.Condition", "v1.Note"],
                     "write": []
                 }
             }

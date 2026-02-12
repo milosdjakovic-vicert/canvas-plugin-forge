@@ -29,14 +29,9 @@ class AppointmentEventHandler(BaseHandler):
             log.warning(f"No patient ID in context for appointment {appointment_id}")
             return []
 
-        # Load configuration
+        # Load configuration and check campaign type before DB queries
         config = load_config()
 
-        # Get patient and appointment
-        patient = Patient.objects.get(id=patient_id)
-        appointment = Appointment.objects.get(id=appointment_id)
-
-        # Determine campaign type and check if enabled
         campaign_type = None
         if event_type == EventType.Name(EventType.APPOINTMENT_CREATED):
             if config.confirmation_enabled:
@@ -51,6 +46,10 @@ class AppointmentEventHandler(BaseHandler):
         if not campaign_type:
             log.info(f"Campaign disabled for event type {event_type}")
             return []
+
+        # Get patient and appointment only when we need to send
+        patient = Patient.objects.get(id=patient_id)
+        appointment = Appointment.objects.get(id=appointment_id)
 
         # Send messages
         log.info(f"Sending {campaign_type} messages for appointment {appointment_id}")

@@ -2,6 +2,7 @@
 import json
 from http import HTTPStatus
 
+from canvas_sdk.caching.plugins import get_cache
 from canvas_sdk.effects import Effect
 from canvas_sdk.effects.simple_api import HTMLResponse, JSONResponse, Response
 from canvas_sdk.handlers.simple_api import SimpleAPI, StaffSessionAuthMixin, api
@@ -193,6 +194,10 @@ class ReminderAPI(StaffSessionAuthMixin, SimpleAPI):
             background: #ffebee;
             color: #c62828;
         }
+        .status-dry-run {
+            background: #fff3e0;
+            color: #e65100;
+        }
         .global-settings {
             background: #f5f5f5;
             padding: 16px;
@@ -221,10 +226,23 @@ class ReminderAPI(StaffSessionAuthMixin, SimpleAPI):
         .add-interval {
             margin-top: 8px;
         }
+        .test-mode-banner {
+            background: #fff3e0;
+            border: 1px solid #ffb74d;
+            color: #e65100;
+            padding: 12px 20px;
+            margin: 16px 24px 0;
+            border-radius: 4px;
+            font-weight: 500;
+            display: none;
+        }
     </style>
 </head>
 <body>
     <div class="container">
+        <div id="test_mode_banner" class="test-mode-banner">
+            TEST MODE — Messaging secrets not configured. Messages are logged but not actually sent.
+        </div>
         <div class="tabs">
             <div class="tab active" onclick="switchTab('campaigns')">Campaigns</div>
             <div class="tab" onclick="switchTab('history')">Message History</div>
@@ -517,18 +535,35 @@ class ReminderAPI(StaffSessionAuthMixin, SimpleAPI):
                 row.insertCell(3).textContent = entry.channel.toUpperCase();
                 const statusCell = row.insertCell(4);
                 const badge = document.createElement('span');
-                badge.className = 'status-badge status-' + entry.status;
-                badge.textContent = entry.status;
+                const statusClass = entry.dry_run ? 'dry-run' : entry.status;
+                badge.className = 'status-badge status-' + statusClass;
+                badge.textContent = entry.dry_run ? 'test' : entry.status;
                 statusCell.appendChild(badge);
             });
         }
 
+        async function checkTestMode() {
+            const response = await fetch('/plugin-io/api/custom_reminders/admin/status');
+            const data = await response.json();
+            if (data.dry_run) {
+                document.getElementById('test_mode_banner').style.display = 'block';
+            }
+        }
+
+        checkTestMode();
         loadConfig();
     </script>
 </body>
 </html>
         """
         return [HTMLResponse(html)]
+
+    @api.get("/admin/status")
+    def get_status(self) -> list[Response | Effect]:
+        """Check if plugin is running in dry-run (test) mode."""
+        sms_ok = all(self.secrets.get(k) for k in ("twilio-account-sid", "twilio-auth-token", "twilio-phone-number"))
+        email_ok = all(self.secrets.get(k) for k in ("sendgrid-api-key", "sendgrid-from-email"))
+        return [JSONResponse({"dry_run": not sms_ok or not email_ok}, status_code=HTTPStatus.OK)]
 
     @api.get("/admin/config")
     def get_config(self) -> list[Response | Effect]:
@@ -547,8 +582,6 @@ class ReminderAPI(StaffSessionAuthMixin, SimpleAPI):
     @api.get("/admin/history")
     def get_global_history(self) -> list[Response | Effect]:
         """Get global message history."""
-        from canvas_sdk.caching.plugins import get_cache
-
         cache = get_cache()
         history_json = cache.get("cr:global_log", default="[]")
         history = json.loads(history_json)
@@ -561,8 +594,6 @@ class ReminderAPI(StaffSessionAuthMixin, SimpleAPI):
     @api.get("/patient/<patient_id>/history")
     def get_patient_history(self, patient_id: str) -> list[Response | Effect]:
         """Get patient-specific message history."""
-        from canvas_sdk.caching.plugins import get_cache
-
         cache = get_cache()
         history_json = cache.get(f"cr:log:{patient_id}", default="[]")
         history = json.loads(history_json)
@@ -631,6 +662,10 @@ class ReminderAPI(StaffSessionAuthMixin, SimpleAPI):
             background: #ffebee;
             color: #c62828;
         }
+        .status-dry-run {
+            background: #fff3e0;
+            color: #e65100;
+        }
         .empty-state {
             text-align: center;
             padding: 40px;
@@ -674,7 +709,9 @@ class ReminderAPI(StaffSessionAuthMixin, SimpleAPI):
                 html += '<td>' + new Date(entry.timestamp).toLocaleString() + '</td>';
                 html += '<td>' + entry.campaign_type + '</td>';
                 html += '<td>' + entry.channel.toUpperCase() + '</td>';
-                html += '<td><span class="status-badge status-' + entry.status + '">' + entry.status + '</span></td>';
+                const statusClass = entry.dry_run ? 'dry-run' : entry.status;
+                const statusLabel = entry.dry_run ? 'test' : entry.status;
+                html += '<td><span class="status-badge status-' + statusClass + '">' + statusLabel + '</span></td>';
                 html += '</tr>';
             });
 

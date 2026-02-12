@@ -1,21 +1,36 @@
 {
     "sdk_version": "0.1.4",
-    "plugin_version": "0.0.1",
+    "plugin_version": "0.0.2",
     "name": "custom_reminders",
     "description": "Automated patient appointment reminders via SMS and email with customizable campaigns for confirmations, reminders, no-shows, and cancellations.",
     "components": {
         "protocols": [
             {
                 "class": "custom_reminders.handlers.event_handler:AppointmentEventHandler",
-                "description": "Sends instant messages for appointment created, canceled, and no-showed events"
+                "description": "Sends instant messages for appointment created, canceled, and no-showed events",
+                "data_access": {
+                    "event": "",
+                    "read": ["v1.Patient", "v1.Appointment", "v1.Staff", "v1.PracticeLocation"],
+                    "write": []
+                }
             },
             {
                 "class": "custom_reminders.handlers.reminder_scheduler:ReminderScheduler",
-                "description": "Cron task that checks for upcoming appointments needing reminders every 15 minutes"
+                "description": "Cron task that checks for upcoming appointments needing reminders every 15 minutes",
+                "data_access": {
+                    "event": "",
+                    "read": ["v1.Patient", "v1.Appointment", "v1.Staff", "v1.PracticeLocation"],
+                    "write": []
+                }
             },
             {
                 "class": "custom_reminders.handlers.reminder_api:ReminderAPI",
-                "description": "API endpoints for admin configuration and message history"
+                "description": "API endpoints for admin configuration and message history",
+                "data_access": {
+                    "event": "",
+                    "read": [],
+                    "write": []
+                }
             }
         ],
         "applications": [

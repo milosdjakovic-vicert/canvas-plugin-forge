@@ -8,6 +8,7 @@ import httpx
 from canvas_sdk.caching.plugins import get_cache
 from canvas_sdk.v1.data.appointment import Appointment
 from canvas_sdk.v1.data.patient import Patient
+from logger import log
 
 from custom_reminders.services.config import CampaignConfig
 from custom_reminders.services.templates import get_template_variables, render_template
@@ -33,6 +34,7 @@ class MessagingService:
         twilio_phone_number: str,
         sendgrid_api_key: str,
         sendgrid_from_email: str,
+        dry_run: bool = False,
     ):
         """Initialize messaging service with credentials."""
         self.twilio_account_sid = twilio_account_sid
@@ -40,10 +42,11 @@ class MessagingService:
         self.twilio_phone_number = twilio_phone_number
         self.sendgrid_api_key = sendgrid_api_key
         self.sendgrid_from_email = sendgrid_from_email
+        self.dry_run = dry_run
 
     def send_sms(self, to_phone: str, body: str) -> MessageResult:
         """
-        Send SMS via Twilio.
+        Send SMS via Twilio (or log in dry-run mode).
 
         Args:
             to_phone: Recipient phone number
@@ -52,6 +55,10 @@ class MessagingService:
         Returns:
             MessageResult with success status
         """
+        if self.dry_run:
+            log.info(f"[DRY RUN] SMS to {to_phone}: {body}")
+            return MessageResult(success=True, channel="sms", message_id="dry-run-sms")
+
         url = f"https://api.twilio.com/2010-04-01/Accounts/{self.twilio_account_sid}/Messages.json"
         data = {
             "To": to_phone,
@@ -71,7 +78,7 @@ class MessagingService:
 
     def send_email(self, to_email: str, subject: str, html_body: str) -> MessageResult:
         """
-        Send email via SendGrid.
+        Send email via SendGrid (or log in dry-run mode).
 
         Args:
             to_email: Recipient email address
@@ -81,6 +88,10 @@ class MessagingService:
         Returns:
             MessageResult with success status
         """
+        if self.dry_run:
+            log.info(f"[DRY RUN] Email to {to_email} | Subject: {subject} | Body: {html_body}")
+            return MessageResult(success=True, channel="email", message_id="dry-run-email")
+
         url = "https://api.sendgrid.com/v3/mail/send"
         headers = {
             "Authorization": f"Bearer {self.sendgrid_api_key}",
@@ -183,13 +194,27 @@ def send_campaign_messages(
     # Get patient contact info
     phone, email = get_patient_contact_info(patient)
 
+    # Auto-detect dry-run mode when secrets are missing
+    sms_secrets_present = all(secrets.get(k) for k in ("twilio-account-sid", "twilio-auth-token", "twilio-phone-number"))
+    email_secrets_present = all(secrets.get(k) for k in ("sendgrid-api-key", "sendgrid-from-email"))
+    dry_run = not sms_secrets_present or not email_secrets_present
+
+    if dry_run:
+        log.info("[DRY RUN] Messaging secrets missing — running in test mode")
+        # Provide fallback contact info so dry-run always produces output
+        if not phone:
+            phone = "+15550000000"
+        if not email:
+            email = "test@example.com"
+
     # Initialize messaging service
     service = MessagingService(
-        twilio_account_sid=secrets["twilio-account-sid"],
-        twilio_auth_token=secrets["twilio-auth-token"],
-        twilio_phone_number=secrets["twilio-phone-number"],
-        sendgrid_api_key=secrets["sendgrid-api-key"],
-        sendgrid_from_email=secrets["sendgrid-from-email"],
+        twilio_account_sid=secrets.get("twilio-account-sid", ""),
+        twilio_auth_token=secrets.get("twilio-auth-token", ""),
+        twilio_phone_number=secrets.get("twilio-phone-number", ""),
+        sendgrid_api_key=secrets.get("sendgrid-api-key", ""),
+        sendgrid_from_email=secrets.get("sendgrid-from-email", ""),
+        dry_run=dry_run,
     )
 
     # Send messages
@@ -227,6 +252,7 @@ def log_message_to_cache(
     # Add new entry
     timestamp = datetime.now(timezone.utc).isoformat()
     for result in results:
+        is_dry_run = result.message_id and result.message_id.startswith("dry-run")
         log_entries.append(
             {
                 "timestamp": timestamp,
@@ -235,6 +261,7 @@ def log_message_to_cache(
                 "campaign_type": campaign_type,
                 "channel": result.channel,
                 "status": "delivered" if result.success else "failed",
+                "dry_run": is_dry_run,
                 "error": result.error,
             }
         )
@@ -250,6 +277,7 @@ def log_message_to_cache(
     existing_global = cache.get(global_log_key, default="[]")
     global_log_entries = json.loads(existing_global)
     for result in results:
+        is_dry_run = result.message_id and result.message_id.startswith("dry-run")
         global_log_entries.append(
             {
                 "timestamp": timestamp,
@@ -258,6 +286,7 @@ def log_message_to_cache(
                 "campaign_type": campaign_type,
                 "channel": result.channel,
                 "status": "delivered" if result.success else "failed",
+                "dry_run": is_dry_run,
                 "error": result.error,
             }
         )

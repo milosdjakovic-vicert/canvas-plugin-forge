@@ -36,7 +36,10 @@
       "WebFetch(domain:docs.extend.ai)",
       "WebFetch(domain:deepwiki.com)",
       "Bash(unbuffer uv run:*)",
-      "Bash(git commit:*)"
+      "Bash(git commit:*)",
+      "Bash(uv sync:*)",
+      "Bash(.venv/bin/python -m pytest:*)",
+      "Bash(git push:*)"
     ]
   },
   "enabledPlugins": {

@@ -212,6 +212,167 @@ def test_send_campaign_messages(mocker):
     assert results[0].channel == "sms"
 
 
+def test_send_sms_dry_run():
+    """Test SMS dry-run mode logs instead of sending."""
+    service = MessagingService(
+        twilio_account_sid="",
+        twilio_auth_token="",
+        twilio_phone_number="",
+        sendgrid_api_key="",
+        sendgrid_from_email="",
+        dry_run=True,
+    )
+
+    result = service.send_sms("+15551234567", "Test message")
+
+    assert result.success is True
+    assert result.channel == "sms"
+    assert result.message_id == "dry-run-sms"
+
+
+def test_send_email_dry_run():
+    """Test email dry-run mode logs instead of sending."""
+    service = MessagingService(
+        twilio_account_sid="",
+        twilio_auth_token="",
+        twilio_phone_number="",
+        sendgrid_api_key="",
+        sendgrid_from_email="",
+        dry_run=True,
+    )
+
+    result = service.send_email("test@example.com", "Subject", "<html>Body</html>")
+
+    assert result.success is True
+    assert result.channel == "email"
+    assert result.message_id == "dry-run-email"
+
+
+def test_send_campaign_messages_reminder(mocker):
+    """Test sending reminder campaign messages."""
+    patient = mocker.Mock()
+    patient.first_name = "Jane"
+    patient.last_name = "Doe"
+    contact = mocker.Mock(system="email", value="jane@example.com", state="active", opted_out=False, has_consent=True)
+    patient.telecom.all.return_value = [contact]
+
+    appointment = mocker.Mock()
+    appointment.id = "appt1"
+    appointment.start_time = datetime(2026, 3, 15, 14, 30, tzinfo=timezone.utc)
+    appointment.provider = mocker.Mock(first_name="Dr.", last_name="Smith")
+    appointment.location = mocker.Mock(full_name="Main Clinic")
+
+    config = CampaignConfig(clinic_name="Test", reminder_channels=["email"])
+    mock_resp = mocker.Mock()
+    mock_resp.headers = {"X-Message-Id": "msg1"}
+    mocker.patch("requests.post", return_value=mock_resp)
+
+    secrets = {
+        "twilio-account-sid": "AC1", "twilio-auth-token": "t", "twilio-phone-number": "+1",
+        "sendgrid-api-key": "sg", "sendgrid-from-email": "a@b.com",
+    }
+
+    results = send_campaign_messages(patient, appointment, config, "reminder", secrets)
+
+    assert len(results) == 1
+    assert results[0].channel == "email"
+
+
+def test_send_campaign_messages_noshow(mocker):
+    """Test sending noshow campaign messages."""
+    patient = mocker.Mock()
+    patient.first_name = "Bob"
+    patient.last_name = "Lee"
+    contact = mocker.Mock(system="phone", value="+155500000", state="active", opted_out=False, has_consent=True)
+    patient.telecom.all.return_value = [contact]
+
+    appointment = mocker.Mock()
+    appointment.id = "appt2"
+    appointment.start_time = datetime(2026, 3, 15, 14, 30, tzinfo=timezone.utc)
+    appointment.provider = mocker.Mock(first_name="Dr.", last_name="Lee")
+    appointment.location = mocker.Mock(full_name="Clinic B")
+
+    config = CampaignConfig(clinic_name="Test", noshow_channels=["sms"])
+    mock_resp = mocker.Mock()
+    mock_resp.json.return_value = {"sid": "SM1"}
+    mocker.patch("requests.post", return_value=mock_resp)
+
+    secrets = {
+        "twilio-account-sid": "AC1", "twilio-auth-token": "t", "twilio-phone-number": "+1",
+        "sendgrid-api-key": "sg", "sendgrid-from-email": "a@b.com",
+    }
+
+    results = send_campaign_messages(patient, appointment, config, "noshow", secrets)
+
+    assert len(results) == 1
+    assert results[0].channel == "sms"
+
+
+def test_send_campaign_messages_cancellation(mocker):
+    """Test sending cancellation campaign messages."""
+    patient = mocker.Mock()
+    patient.first_name = "Sue"
+    patient.last_name = "Park"
+    phone_contact = mocker.Mock(system="phone", value="+155511111", state="active", opted_out=False, has_consent=True)
+    email_contact = mocker.Mock(system="email", value="sue@test.com", state="active", opted_out=False, has_consent=True)
+    patient.telecom.all.return_value = [phone_contact, email_contact]
+
+    appointment = mocker.Mock()
+    appointment.id = "appt3"
+    appointment.start_time = datetime(2026, 3, 15, 14, 30, tzinfo=timezone.utc)
+    appointment.provider = mocker.Mock(first_name="Dr.", last_name="Kim")
+    appointment.location = mocker.Mock(full_name="Clinic C")
+
+    config = CampaignConfig(clinic_name="Test", cancellation_channels=["sms", "email"])
+    mock_resp = mocker.Mock()
+    mock_resp.json.return_value = {"sid": "SM2"}
+    mock_resp.headers = {"X-Message-Id": "msg2"}
+    mocker.patch("requests.post", return_value=mock_resp)
+
+    secrets = {
+        "twilio-account-sid": "AC1", "twilio-auth-token": "t", "twilio-phone-number": "+1",
+        "sendgrid-api-key": "sg", "sendgrid-from-email": "a@b.com",
+    }
+
+    results = send_campaign_messages(patient, appointment, config, "cancellation", secrets)
+
+    assert len(results) == 2
+
+
+def test_send_campaign_messages_unknown_type(mocker):
+    """Test unknown campaign type returns empty list."""
+    patient = mocker.Mock()
+    appointment = mocker.Mock()
+    config = CampaignConfig()
+
+    results = send_campaign_messages(patient, appointment, config, "unknown", {})
+
+    assert results == []
+
+
+def test_send_campaign_messages_dry_run_fallback_contacts(mocker):
+    """Test dry-run mode provides fallback contact info."""
+    patient = mocker.Mock()
+    patient.first_name = "Test"
+    patient.last_name = "User"
+    patient.telecom.all.return_value = []  # No contacts
+
+    appointment = mocker.Mock()
+    appointment.id = "appt4"
+    appointment.start_time = datetime(2026, 3, 15, 14, 30, tzinfo=timezone.utc)
+    appointment.provider = mocker.Mock(first_name="Dr.", last_name="A")
+    appointment.location = mocker.Mock(full_name="Clinic")
+
+    config = CampaignConfig(clinic_name="Test", confirmation_channels=["sms", "email"])
+
+    # No secrets → dry-run mode with fallback contacts
+    results = send_campaign_messages(patient, appointment, config, "confirmation", {})
+
+    assert len(results) == 2
+    assert results[0].message_id == "dry-run-sms"
+    assert results[1].message_id == "dry-run-email"
+
+
 def test_log_message_to_cache(mocker):
     """Test logging messages to cache."""
     mock_cache = mocker.Mock()

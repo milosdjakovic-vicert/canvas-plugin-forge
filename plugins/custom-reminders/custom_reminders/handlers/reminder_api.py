@@ -592,8 +592,9 @@ class ReminderAPI(StaffSessionAuthMixin, SimpleAPI):
         return [JSONResponse(history, status_code=HTTPStatus.OK)]
 
     @api.get("/patient/<patient_id>/history")
-    def get_patient_history(self, patient_id: str) -> list[Response | Effect]:
+    def get_patient_history(self) -> list[Response | Effect]:
         """Get patient-specific message history."""
+        patient_id = self.request.path_params["patient_id"]
         cache = get_cache()
         history_json = cache.get(f"cr:log:{patient_id}", default="[]")
         history = json.loads(history_json)
@@ -683,40 +684,50 @@ class ReminderAPI(StaffSessionAuthMixin, SimpleAPI):
 
     <script>
         async function loadHistory() {
-            // Get patient ID from URL parameter
-            const urlParams = new URLSearchParams(window.location.search);
-            const patientId = urlParams.get('patient_id');
+            try {
+                // Get patient ID from URL parameter
+                const urlParams = new URLSearchParams(window.location.search);
+                const patientId = urlParams.get('patient_id');
 
-            if (!patientId) {
-                document.getElementById('content').innerHTML = '<div class="empty-state">No patient ID provided</div>';
-                return;
+                if (!patientId) {
+                    document.getElementById('content').innerHTML = '<div class="empty-state">No patient ID provided</div>';
+                    return;
+                }
+
+                const response = await fetch('/plugin-io/api/custom_reminders/patient/' + patientId + '/history', {cache: 'no-store'});
+
+                if (!response.ok) {
+                    document.getElementById('content').innerHTML = '<div class="empty-state">Error: ' + response.status + ' ' + response.statusText + '</div>';
+                    return;
+                }
+
+                const history = await response.json();
+
+                if (history.length === 0) {
+                    document.getElementById('content').innerHTML = '<div class="empty-state">No messages sent to this patient yet</div>';
+                    return;
+                }
+
+                let html = '<table class="history-table"><thead><tr>';
+                html += '<th>Date</th><th>Campaign</th><th>Channel</th><th>Status</th>';
+                html += '</tr></thead><tbody>';
+
+                history.forEach(entry => {
+                    html += '<tr>';
+                    html += '<td>' + new Date(entry.timestamp).toLocaleString() + '</td>';
+                    html += '<td>' + entry.campaign_type + '</td>';
+                    html += '<td>' + entry.channel.toUpperCase() + '</td>';
+                    const statusClass = entry.dry_run ? 'dry-run' : entry.status;
+                    const statusLabel = entry.dry_run ? 'test' : entry.status;
+                    html += '<td><span class="status-badge status-' + statusClass + '">' + statusLabel + '</span></td>';
+                    html += '</tr>';
+                });
+
+                html += '</tbody></table>';
+                document.getElementById('content').innerHTML = html;
+            } catch (err) {
+                document.getElementById('content').innerHTML = '<div class="empty-state">Error: ' + err.message + '</div>';
             }
-
-            const response = await fetch('/plugin-io/api/custom_reminders/patient/' + patientId + '/history');
-            const history = await response.json();
-
-            if (history.length === 0) {
-                document.getElementById('content').innerHTML = '<div class="empty-state">No messages sent to this patient yet</div>';
-                return;
-            }
-
-            let html = '<table class="history-table"><thead><tr>';
-            html += '<th>Date</th><th>Campaign</th><th>Channel</th><th>Status</th>';
-            html += '</tr></thead><tbody>';
-
-            history.forEach(entry => {
-                html += '<tr>';
-                html += '<td>' + new Date(entry.timestamp).toLocaleString() + '</td>';
-                html += '<td>' + entry.campaign_type + '</td>';
-                html += '<td>' + entry.channel.toUpperCase() + '</td>';
-                const statusClass = entry.dry_run ? 'dry-run' : entry.status;
-                const statusLabel = entry.dry_run ? 'test' : entry.status;
-                html += '<td><span class="status-badge status-' + statusClass + '">' + statusLabel + '</span></td>';
-                html += '</tr>';
-            });
-
-            html += '</tbody></table>';
-            document.getElementById('content').innerHTML = html;
         }
 
         loadHistory();

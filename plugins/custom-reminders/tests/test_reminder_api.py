@@ -141,7 +141,10 @@ def test_api_get_patient_history(mocker: pytest.fixture) -> None:
     mocker.patch("custom_reminders.handlers.reminder_api.get_cache", return_value=mock_cache)
 
     api = _make_api()
-    responses = api.get_patient_history("patient123")
+    mock_request = MagicMock()
+    mock_request.path_params = {"patient_id": "patient123"}
+    type(api).request = PropertyMock(return_value=mock_request)
+    responses = api.get_patient_history()
 
     assert len(responses) == 1
     json_response = responses[0]

@@ -4,7 +4,7 @@ from dataclasses import dataclass
 from datetime import datetime, timezone
 from typing import Any
 
-import httpx
+import requests
 from canvas_sdk.caching.plugins import get_cache
 from canvas_sdk.v1.data.appointment import Appointment
 from canvas_sdk.v1.data.patient import Patient
@@ -67,8 +67,8 @@ class MessagingService:
         }
 
         try:
-            response = httpx.post(
-                url, data=data, auth=(self.twilio_account_sid, self.twilio_auth_token), timeout=10.0
+            response = requests.post(
+                url, data=data, auth=(self.twilio_account_sid, self.twilio_auth_token), timeout=10
             )
             response.raise_for_status()
             result_data = response.json()
@@ -105,7 +105,7 @@ class MessagingService:
         }
 
         try:
-            response = httpx.post(url, headers=headers, json=data, timeout=10.0)
+            response = requests.post(url, headers=headers, json=data, timeout=10)
             response.raise_for_status()
             message_id = response.headers.get("X-Message-Id", "")
             return MessageResult(success=True, channel="email", message_id=message_id)
@@ -270,7 +270,7 @@ def log_message_to_cache(
     log_entries = log_entries[-100:]
 
     # Save back to cache (14 days)
-    cache.set(log_key, json.dumps(log_entries), timeout=1209600)
+    cache.set(log_key, json.dumps(log_entries), timeout_seconds=1209600)
 
     # Also update global log
     global_log_key = "cr:global_log"
@@ -292,4 +292,4 @@ def log_message_to_cache(
         )
     # Keep only last 1000 entries globally
     global_log_entries = global_log_entries[-1000:]
-    cache.set(global_log_key, json.dumps(global_log_entries), timeout=1209600)
+    cache.set(global_log_key, json.dumps(global_log_entries), timeout_seconds=1209600)

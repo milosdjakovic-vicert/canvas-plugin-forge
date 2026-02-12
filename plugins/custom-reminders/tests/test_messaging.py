@@ -2,7 +2,7 @@
 import json
 from datetime import datetime, timezone
 
-import httpx
+import requests
 import pytest
 
 from custom_reminders.services.config import CampaignConfig
@@ -19,7 +19,7 @@ def test_messaging_service_send_sms_success(mocker):
     """Test successful SMS sending."""
     mock_response = mocker.Mock()
     mock_response.json.return_value = {"sid": "SM123456"}
-    mock_post = mocker.patch("httpx.post", return_value=mock_response)
+    mock_post = mocker.patch("requests.post", return_value=mock_response)
 
     service = MessagingService(
         twilio_account_sid="AC123",
@@ -39,7 +39,7 @@ def test_messaging_service_send_sms_success(mocker):
 
 def test_messaging_service_send_sms_failure(mocker):
     """Test SMS sending failure."""
-    mocker.patch("httpx.post", side_effect=httpx.HTTPError("Network error"))
+    mocker.patch("requests.post", side_effect=requests.HTTPError("Network error"))
 
     service = MessagingService(
         twilio_account_sid="AC123",
@@ -60,7 +60,7 @@ def test_messaging_service_send_email_success(mocker):
     """Test successful email sending."""
     mock_response = mocker.Mock()
     mock_response.headers = {"X-Message-Id": "msg123"}
-    mock_post = mocker.patch("httpx.post", return_value=mock_response)
+    mock_post = mocker.patch("requests.post", return_value=mock_response)
 
     service = MessagingService(
         twilio_account_sid="AC123",
@@ -80,7 +80,7 @@ def test_messaging_service_send_email_success(mocker):
 
 def test_messaging_service_send_email_failure(mocker):
     """Test email sending failure."""
-    mocker.patch("httpx.post", side_effect=httpx.HTTPError("API error"))
+    mocker.patch("requests.post", side_effect=requests.HTTPError("API error"))
 
     service = MessagingService(
         twilio_account_sid="AC123",
@@ -195,7 +195,7 @@ def test_send_campaign_messages(mocker):
     # Mock messaging service
     mock_response = mocker.Mock()
     mock_response.json.return_value = {"sid": "SM123"}
-    mocker.patch("httpx.post", return_value=mock_response)
+    mocker.patch("requests.post", return_value=mock_response)
 
     secrets = {
         "twilio-account-sid": "AC123",

@@ -21,7 +21,7 @@ class AppointmentEventHandler(BaseHandler):
 
     def compute(self) -> list[Effect]:
         """Send appropriate message based on event type."""
-        event_type = self.event.event_type
+        event_type = self.event.name
         appointment_id = self.event.target.id
         patient_id = self.event.context.get("patient", {}).get("id")
 

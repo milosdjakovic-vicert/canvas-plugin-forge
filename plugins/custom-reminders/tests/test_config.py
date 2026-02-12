@@ -83,7 +83,7 @@ def test_save_config(mocker):
     mock_cache.set.assert_called_once()
     call_args = mock_cache.set.call_args
     assert call_args[0][0] == CACHE_KEY_CONFIG
-    assert call_args[1]["timeout"] == CACHE_TTL
+    assert call_args[1]["timeout_seconds"] == CACHE_TTL
 
     # Verify saved data can be deserialized
     saved_json = call_args[0][1]

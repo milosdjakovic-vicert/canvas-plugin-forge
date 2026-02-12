@@ -1,6 +1,6 @@
 {
     "sdk_version": "0.1.4",
-    "plugin_version": "0.0.2",
+    "plugin_version": "0.0.8",
     "name": "custom_reminders",
     "description": "Automated patient appointment reminders via SMS and email with customizable campaigns for confirmations, reminders, no-shows, and cancellations.",
     "components": {

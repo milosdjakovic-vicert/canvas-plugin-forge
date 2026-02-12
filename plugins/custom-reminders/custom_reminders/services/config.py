@@ -126,4 +126,4 @@ def load_config() -> CampaignConfig:
 def save_config(config: CampaignConfig) -> None:
     """Save campaign configuration to cache."""
     cache = get_cache()
-    cache.set(CACHE_KEY_CONFIG, json.dumps(config.to_dict()), timeout=CACHE_TTL)
+    cache.set(CACHE_KEY_CONFIG, json.dumps(config.to_dict()), timeout_seconds=CACHE_TTL)

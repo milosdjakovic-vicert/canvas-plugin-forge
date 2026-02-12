@@ -68,7 +68,7 @@ class ReminderScheduler(CronTask):
                     log_message_to_cache(appointment.id, patient.id, "reminder", results)
 
                     # Mark as sent (TTL = 7 days, longer than any reminder window)
-                    cache.set(cache_key, "1", timeout=604800)
+                    cache.set(cache_key, "1", timeout_seconds=604800)
 
                     reminders_sent += 1
 

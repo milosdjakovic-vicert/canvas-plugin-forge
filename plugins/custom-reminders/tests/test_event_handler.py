@@ -26,7 +26,7 @@ def test_event_handler_responds_to_correct_events() -> None:
 def test_event_handler_appointment_created(mocker: pytest.fixture) -> None:
     """Test handler for appointment created event."""
     event = MagicMock()
-    event.event_type = EventType.Name(EventType.APPOINTMENT_CREATED)
+    event.name = EventType.Name(EventType.APPOINTMENT_CREATED)
     event.target.id = "appt123"
     event.context = {"patient": {"id": "patient456"}}
 
@@ -57,7 +57,7 @@ def test_event_handler_appointment_created(mocker: pytest.fixture) -> None:
 def test_event_handler_campaign_disabled(mocker: pytest.fixture) -> None:
     """Test handler skips when campaign is disabled."""
     event = MagicMock()
-    event.event_type = EventType.Name(EventType.APPOINTMENT_CREATED)
+    event.name = EventType.Name(EventType.APPOINTMENT_CREATED)
     event.target.id = "appt123"
     event.context = {"patient": {"id": "patient456"}}
 
@@ -77,7 +77,7 @@ def test_event_handler_campaign_disabled(mocker: pytest.fixture) -> None:
 def test_event_handler_no_patient_id(mocker: pytest.fixture) -> None:
     """Test handler handles missing patient ID gracefully."""
     event = MagicMock()
-    event.event_type = EventType.Name(EventType.APPOINTMENT_CREATED)
+    event.name = EventType.Name(EventType.APPOINTMENT_CREATED)
     event.target.id = "appt123"
     event.context = {}
 
@@ -90,7 +90,7 @@ def test_event_handler_no_patient_id(mocker: pytest.fixture) -> None:
 def test_event_handler_appointment_canceled(mocker: pytest.fixture) -> None:
     """Test handler for appointment canceled event."""
     event = MagicMock()
-    event.event_type = EventType.Name(EventType.APPOINTMENT_CANCELED)
+    event.name = EventType.Name(EventType.APPOINTMENT_CANCELED)
     event.target.id = "appt123"
     event.context = {"patient": {"id": "patient456"}}
 
@@ -121,7 +121,7 @@ def test_event_handler_appointment_canceled(mocker: pytest.fixture) -> None:
 def test_event_handler_appointment_no_showed(mocker: pytest.fixture) -> None:
     """Test handler for appointment no-showed event."""
     event = MagicMock()
-    event.event_type = EventType.Name(EventType.APPOINTMENT_NO_SHOWED)
+    event.name = EventType.Name(EventType.APPOINTMENT_NO_SHOWED)
     event.target.id = "appt123"
     event.context = {"patient": {"id": "patient456"}}
 

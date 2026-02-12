@@ -149,6 +149,38 @@
     {
       "input": "push to remote",
       "type": "free_text"
+    },
+    {
+      "input": "/clear",
+      "type": "slash_command"
+    },
+    {
+      "input": "/cpa:create-icon",
+      "type": "slash_command"
+    },
+    {
+      "input": "what icon do you propose for @plugins/weight-loss-charting/ ?",
+      "type": "free_text"
+    },
+    {
+      "input": "/cpa:create-icon",
+      "type": "slash_command"
+    },
+    {
+      "input": "/cpa:create-icon",
+      "type": "slash_command"
+    },
+    {
+      "input": "yes, and where can i see this icon",
+      "type": "free_text"
+    },
+    {
+      "input": "i mean where can i see it in canvas UI?",
+      "type": "free_text"
+    },
+    {
+      "input": "clean them up",
+      "type": "free_text"
     }
   ]
 }

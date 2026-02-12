@@ -1,5 +1,4 @@
 """Template rendering for reminder messages."""
-from datetime import datetime
 from typing import Any
 
 from canvas_sdk.v1.data.appointment import Appointment

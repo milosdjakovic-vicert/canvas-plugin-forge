@@ -6,7 +6,6 @@ from canvas_sdk.caching.plugins import get_cache
 from canvas_sdk.effects import Effect
 from canvas_sdk.effects.simple_api import HTMLResponse, JSONResponse, Response
 from canvas_sdk.handlers.simple_api import SimpleAPI, StaffSessionAuthMixin, api
-from logger import log
 
 from custom_reminders.services.config import CampaignConfig, load_config, save_config
 

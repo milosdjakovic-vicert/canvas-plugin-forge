@@ -133,7 +133,7 @@ mypy custom_reminders/
 1. Install dependencies: `uv sync`
 2. Set up secrets in `.env` file
 3. Run tests: `pytest`
-4. Deploy to test instance: `uv run canvas deploy`
+4. Deploy to test instance: `uv run canvas install`
 
 ## Support
 

@@ -37,8 +37,10 @@ def test_event_handler_appointment_created(mocker: pytest.fixture) -> None:
     mock_patient = MagicMock()
     mock_appointment = MagicMock()
     mocker.patch("custom_reminders.handlers.event_handler.Patient.objects.get", return_value=mock_patient)
+    mock_select = MagicMock()
+    mock_select.get.return_value = mock_appointment
     mocker.patch(
-        "custom_reminders.handlers.event_handler.Appointment.objects.get", return_value=mock_appointment
+        "custom_reminders.handlers.event_handler.Appointment.objects.select_related", return_value=mock_select
     )
 
     mock_results = [MagicMock(success=True, channel="sms")]
@@ -101,8 +103,10 @@ def test_event_handler_appointment_canceled(mocker: pytest.fixture) -> None:
     mock_patient = MagicMock()
     mock_appointment = MagicMock()
     mocker.patch("custom_reminders.handlers.event_handler.Patient.objects.get", return_value=mock_patient)
+    mock_select = MagicMock()
+    mock_select.get.return_value = mock_appointment
     mocker.patch(
-        "custom_reminders.handlers.event_handler.Appointment.objects.get", return_value=mock_appointment
+        "custom_reminders.handlers.event_handler.Appointment.objects.select_related", return_value=mock_select
     )
 
     mock_results = [MagicMock(success=True, channel="email")]
@@ -132,8 +136,10 @@ def test_event_handler_appointment_no_showed(mocker: pytest.fixture) -> None:
     mock_patient = MagicMock()
     mock_appointment = MagicMock()
     mocker.patch("custom_reminders.handlers.event_handler.Patient.objects.get", return_value=mock_patient)
+    mock_select = MagicMock()
+    mock_select.get.return_value = mock_appointment
     mocker.patch(
-        "custom_reminders.handlers.event_handler.Appointment.objects.get", return_value=mock_appointment
+        "custom_reminders.handlers.event_handler.Appointment.objects.select_related", return_value=mock_select
     )
 
     mock_results = [MagicMock(success=True, channel="sms")]

@@ -54,16 +54,15 @@ def test_scheduler_sends_reminders(mocker: pytest.fixture) -> None:
     appt1.patient = MagicMock()
     appt1.patient.id = "patient1"
 
+    mock_filter = MagicMock()
+    mock_filter.select_related.return_value = [appt1]
     mocker.patch(
         "custom_reminders.handlers.reminder_scheduler.Appointment.objects.filter",
-        return_value=[appt1],
+        return_value=mock_filter,
     )
 
-    mock_patient = MagicMock()
-    mocker.patch("custom_reminders.handlers.reminder_scheduler.Patient.objects.get", return_value=mock_patient)
-
     mock_results = [MagicMock(success=True, channel="sms")]
-    mocker.patch(
+    mock_send = mocker.patch(
         "custom_reminders.handlers.reminder_scheduler.send_campaign_messages",
         return_value=mock_results,
     )
@@ -73,6 +72,9 @@ def test_scheduler_sends_reminders(mocker: pytest.fixture) -> None:
     effects = scheduler.execute()
 
     assert effects == []
+    mock_send.assert_called_once()
+    # Verify appointment.patient is passed directly (no separate Patient.objects.get)
+    assert mock_send.call_args[0][0] == appt1.patient
     mock_log.assert_called_once()
     mock_cache.set.assert_called()
 
@@ -96,9 +98,11 @@ def test_scheduler_skips_already_sent(mocker: pytest.fixture) -> None:
     appt1.patient = MagicMock()
     appt1.patient.id = "patient1"
 
+    mock_filter = MagicMock()
+    mock_filter.select_related.return_value = [appt1]
     mocker.patch(
         "custom_reminders.handlers.reminder_scheduler.Appointment.objects.filter",
-        return_value=[appt1],
+        return_value=mock_filter,
     )
 
     mock_send = mocker.patch("custom_reminders.handlers.reminder_scheduler.send_campaign_messages")
@@ -135,13 +139,12 @@ def test_scheduler_multiple_intervals(mocker: pytest.fixture) -> None:
     appt2.patient = MagicMock()
     appt2.patient.id = "patient2"
 
+    mock_filter = MagicMock()
+    mock_filter.select_related.return_value = [appt1, appt2]
     mocker.patch(
         "custom_reminders.handlers.reminder_scheduler.Appointment.objects.filter",
-        return_value=[appt1, appt2],
+        return_value=mock_filter,
     )
-
-    mock_patient = MagicMock()
-    mocker.patch("custom_reminders.handlers.reminder_scheduler.Patient.objects.get", return_value=mock_patient)
 
     mock_results = [MagicMock(success=True, channel="sms")]
     mocker.patch(

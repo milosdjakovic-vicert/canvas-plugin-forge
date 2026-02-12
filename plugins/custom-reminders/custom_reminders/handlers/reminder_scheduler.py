@@ -5,7 +5,6 @@ from canvas_sdk.caching.plugins import get_cache
 from canvas_sdk.effects import Effect
 from canvas_sdk.handlers.cron_task import CronTask
 from canvas_sdk.v1.data.appointment import Appointment
-from canvas_sdk.v1.data.patient import Patient
 from logger import log
 
 from custom_reminders.services.config import load_config, save_config
@@ -33,7 +32,9 @@ class ReminderScheduler(CronTask):
 
         # Get appointments in the next 7 days (max reminder window)
         end_window = now + timedelta(days=7)
-        appointments = Appointment.objects.filter(start_time__gte=now, start_time__lte=end_window)
+        appointments = Appointment.objects.filter(
+            start_time__gte=now, start_time__lte=end_window
+        ).select_related("patient", "provider", "location")
 
         reminders_sent = 0
 
@@ -59,13 +60,12 @@ class ReminderScheduler(CronTask):
                         f"Sending {interval_minutes}-minute reminder for appointment {appointment.id}"
                     )
 
-                    patient = Patient.objects.get(id=appointment.patient.id)
                     results = send_campaign_messages(
-                        patient, appointment, config, "reminder", self.secrets
+                        appointment.patient, appointment, config, "reminder", self.secrets
                     )
 
                     # Log to cache
-                    log_message_to_cache(appointment.id, patient.id, "reminder", results)
+                    log_message_to_cache(appointment.id, appointment.patient.id, "reminder", results)
 
                     # Mark as sent (TTL = 7 days, longer than any reminder window)
                     cache.set(cache_key, "1", timeout_seconds=604800)

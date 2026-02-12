@@ -49,7 +49,7 @@ class AppointmentEventHandler(BaseHandler):
 
         # Get patient and appointment only when we need to send
         patient = Patient.objects.get(id=patient_id)
-        appointment = Appointment.objects.get(id=appointment_id)
+        appointment = Appointment.objects.select_related("provider", "location").get(id=appointment_id)
 
         # Send messages
         log.info(f"Sending {campaign_type} messages for appointment {appointment_id}")

@@ -34,7 +34,9 @@
       "WebFetch(domain:www.hl7.org)",
       "WebFetch(domain:build.fhir.org)",
       "WebFetch(domain:docs.extend.ai)",
-      "WebFetch(domain:deepwiki.com)"
+      "WebFetch(domain:deepwiki.com)",
+      "Bash(unbuffer uv run:*)",
+      "Bash(git commit:*)"
     ]
   },
   "enabledPlugins": {

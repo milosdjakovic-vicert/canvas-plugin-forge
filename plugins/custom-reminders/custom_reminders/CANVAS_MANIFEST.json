@@ -1,0 +1,54 @@
+{
+    "sdk_version": "0.1.4",
+    "plugin_version": "0.0.1",
+    "name": "custom_reminders",
+    "description": "Automated patient appointment reminders via SMS and email with customizable campaigns for confirmations, reminders, no-shows, and cancellations.",
+    "components": {
+        "protocols": [
+            {
+                "class": "custom_reminders.handlers.event_handler:AppointmentEventHandler",
+                "description": "Sends instant messages for appointment created, canceled, and no-showed events"
+            },
+            {
+                "class": "custom_reminders.handlers.reminder_scheduler:ReminderScheduler",
+                "description": "Cron task that checks for upcoming appointments needing reminders every 15 minutes"
+            },
+            {
+                "class": "custom_reminders.handlers.reminder_api:ReminderAPI",
+                "description": "API endpoints for admin configuration and message history"
+            }
+        ],
+        "applications": [
+            {
+                "class": "custom_reminders.handlers.admin_app:ReminderAdminApp",
+                "name": "Reminders Admin",
+                "description": "Configure reminder campaigns and view global message history",
+                "icon": "assets/admin-icon.png",
+                "scope": "global"
+            },
+            {
+                "class": "custom_reminders.handlers.patient_app:ReminderPatientApp",
+                "name": "Reminders History",
+                "description": "View reminder messages sent to this patient",
+                "icon": "assets/patient-icon.png",
+                "scope": "patient_specific"
+            }
+        ],
+        "commands": [],
+        "content": [],
+        "effects": [],
+        "views": []
+    },
+    "secrets": [
+        "twilio-account-sid",
+        "twilio-auth-token",
+        "twilio-phone-number",
+        "sendgrid-api-key",
+        "sendgrid-from-email"
+    ],
+    "tags": {},
+    "references": [],
+    "license": "",
+    "diagram": false,
+    "readme": "./README.md"
+}

@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+  <!-- Message bubble -->
+  <path d="M20 25 L80 25 C85 25 88 28 88 33 L88 60 C88 65 85 68 80 68 L45 68 L30 80 L30 68 L20 68 C15 68 12 65 12 60 L12 33 C12 28 15 25 20 25 Z" fill="#1976d2" stroke="#1565c0" stroke-width="2"/>
+
+  <!-- Notification bell inside bubble -->
+  <path d="M50 38 C48 38 46 40 46 42 L46 48 C43 48.5 41 51 41 54 L41 54 L59 54 L59 54 C59 51 57 48.5 54 48 L54 42 C54 40 52 38 50 38 Z" fill="#ffffff"/>
+
+  <!-- Bell bottom -->
+  <path d="M47 56 C47 58 48.3 59 50 59 C51.7 59 53 58 53 56 Z" fill="#ffffff"/>
+
+  <!-- Clock face at bottom right -->
+  <circle cx="72" cy="78" r="12" fill="#424242" stroke="#ffffff" stroke-width="2"/>
+
+  <!-- Clock hands -->
+  <line x1="72" y1="78" x2="72" y2="72" stroke="#ffffff" stroke-width="2" stroke-linecap="round"/>
+  <line x1="72" y1="78" x2="76" y2="78" stroke="#ffffff" stroke-width="2" stroke-linecap="round"/>
+</svg>

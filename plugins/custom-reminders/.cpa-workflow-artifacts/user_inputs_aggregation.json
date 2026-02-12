@@ -31,6 +31,31 @@
     {
       "input": "/clear",
       "type": "slash_command"
+    },
+    {
+      "input": "/cpa:new-plugin",
+      "type": "slash_command"
+    },
+    {
+      "input": "Custom Reminders\n\nBuild an application that allows customers to customize content and frequency of the following campaigns via text and email\n\nAppointment Confirmation\nAppointment Reminders\nNo Show Alerts\nCancellation Alerts\n\nHistory of outbound messages should be visible at both the patient and global view for admins\n\nTwilio/Sendgrid Keys should be hidden  (if using ours)",
+      "type": "free_text"
+    },
+    {
+      "input": "what would you propose this from standpoint of running a clinic and clinical workflow?",
+      "type": "free_text"
+    },
+    {
+      "input": "Looks good, proceed",
+      "type": "question_answer",
+      "question": "Does this proposed approach align with what you're envisioning? Any adjustments?"
+    },
+    {
+      "input": "proceed",
+      "type": "free_text"
+    },
+    {
+      "input": "/exit",
+      "type": "slash_command"
     }
   ]
 }

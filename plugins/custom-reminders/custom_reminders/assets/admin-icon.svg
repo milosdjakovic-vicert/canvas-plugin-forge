@@ -1,0 +1,35 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+  <!-- Calendar base -->
+  <rect x="15" y="25" width="50" height="50" rx="4" fill="#1976d2" stroke="#1565c0" stroke-width="2"/>
+  <rect x="15" y="25" width="50" height="12" rx="4" fill="#1565c0"/>
+
+  <!-- Calendar rings -->
+  <circle cx="25" cy="25" r="3" fill="#ffffff"/>
+  <circle cx="35" cy="25" r="3" fill="#ffffff"/>
+  <circle cx="45" cy="25" r="3" fill="#ffffff"/>
+  <circle cx="55" cy="25" r="3" fill="#ffffff"/>
+
+  <!-- Calendar grid -->
+  <line x1="25" y1="42" x2="55" y2="42" stroke="#ffffff" stroke-width="1.5"/>
+  <line x1="25" y1="52" x2="55" y2="52" stroke="#ffffff" stroke-width="1.5"/>
+  <line x1="25" y1="62" x2="55" y2="62" stroke="#ffffff" stroke-width="1.5"/>
+  <line x1="30" y1="37" x2="30" y2="70" stroke="#ffffff" stroke-width="1.5"/>
+  <line x1="40" y1="37" x2="40" y2="70" stroke="#ffffff" stroke-width="1.5"/>
+  <line x1="50" y1="37" x2="50" y2="70" stroke="#ffffff" stroke-width="1.5"/>
+
+  <!-- Settings gear -->
+  <circle cx="70" cy="70" r="15" fill="#424242"/>
+  <circle cx="70" cy="70" r="10" fill="#616161"/>
+  <circle cx="70" cy="70" r="5" fill="#424242"/>
+
+  <!-- Gear teeth -->
+  <rect x="68" y="54" width="4" height="5" fill="#424242"/>
+  <rect x="68" y="81" width="4" height="5" fill="#424242"/>
+  <rect x="54" y="68" width="5" height="4" fill="#424242"/>
+  <rect x="81" y="68" width="5" height="4" fill="#424242"/>
+
+  <rect x="59" y="59" width="4" height="4" fill="#424242" transform="rotate(45 61 61)"/>
+  <rect x="77" y="59" width="4" height="4" fill="#424242" transform="rotate(-45 79 61)"/>
+  <rect x="59" y="77" width="4" height="4" fill="#424242" transform="rotate(-45 61 79)"/>
+  <rect x="77" y="77" width="4" height="4" fill="#424242" transform="rotate(45 79 79)"/>
+</svg>

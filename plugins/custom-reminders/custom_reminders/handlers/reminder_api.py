@@ -575,7 +575,10 @@ class ReminderAPI(StaffSessionAuthMixin, SimpleAPI):
     def save_config_endpoint(self) -> list[Response | Effect]:
         """Save campaign configuration."""
         data = self.request.json()
-        config = CampaignConfig.from_dict(data)
+        try:
+            config = CampaignConfig.from_dict(data)
+        except TypeError as e:
+            return [JSONResponse({"error": f"Invalid configuration: {e}"}, status_code=HTTPStatus.BAD_REQUEST)]
         save_config(config)
         return [JSONResponse({"status": "ok"}, status_code=HTTPStatus.OK)]
 
@@ -708,23 +711,33 @@ class ReminderAPI(StaffSessionAuthMixin, SimpleAPI):
                     return;
                 }
 
-                let html = '<table class="history-table"><thead><tr>';
-                html += '<th>Date</th><th>Campaign</th><th>Channel</th><th>Status</th>';
-                html += '</tr></thead><tbody>';
-
-                history.forEach(entry => {
-                    html += '<tr>';
-                    html += '<td>' + new Date(entry.timestamp).toLocaleString() + '</td>';
-                    html += '<td>' + entry.campaign_type + '</td>';
-                    html += '<td>' + entry.channel.toUpperCase() + '</td>';
-                    const statusClass = entry.dry_run ? 'dry-run' : entry.status;
-                    const statusLabel = entry.dry_run ? 'test' : entry.status;
-                    html += '<td><span class="status-badge status-' + statusClass + '">' + statusLabel + '</span></td>';
-                    html += '</tr>';
+                const table = document.createElement('table');
+                table.className = 'history-table';
+                const thead = table.createTHead();
+                const headerRow = thead.insertRow();
+                ['Date', 'Campaign', 'Channel', 'Status'].forEach(text => {
+                    const th = document.createElement('th');
+                    th.textContent = text;
+                    headerRow.appendChild(th);
                 });
 
-                html += '</tbody></table>';
-                document.getElementById('content').innerHTML = html;
+                const tbody = table.createTBody();
+                history.forEach(entry => {
+                    const row = tbody.insertRow();
+                    row.insertCell(0).textContent = new Date(entry.timestamp).toLocaleString();
+                    row.insertCell(1).textContent = entry.campaign_type;
+                    row.insertCell(2).textContent = entry.channel.toUpperCase();
+                    const statusCell = row.insertCell(3);
+                    const badge = document.createElement('span');
+                    const statusClass = entry.dry_run ? 'dry-run' : entry.status;
+                    badge.className = 'status-badge status-' + statusClass;
+                    badge.textContent = entry.dry_run ? 'test' : entry.status;
+                    statusCell.appendChild(badge);
+                });
+
+                const content = document.getElementById('content');
+                content.innerHTML = '';
+                content.appendChild(table);
             } catch (err) {
                 document.getElementById('content').innerHTML = '<div class="empty-state">Error: ' + err.message + '</div>';
             }

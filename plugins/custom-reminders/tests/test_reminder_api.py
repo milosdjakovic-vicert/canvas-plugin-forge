@@ -163,6 +163,24 @@ def test_api_get_patient_view_page() -> None:
     assert b"loadHistory" in response.content
 
 
+def test_api_save_config_invalid_keys(mocker: pytest.fixture) -> None:
+    """Test saving config with unexpected keys returns 400."""
+    mock_request = MagicMock()
+    mock_request.json.return_value = {
+        "clinic_name": "Test",
+        "bogus_field": "should cause TypeError",
+    }
+
+    api = _make_api()
+    type(api).request = PropertyMock(return_value=mock_request)
+    responses = api.save_config_endpoint()
+
+    assert len(responses) == 1
+    json_response = responses[0]
+    assert json_response.status_code == HTTPStatus.BAD_REQUEST
+    assert b"Invalid configuration" in json_response.content
+
+
 def test_api_empty_history(mocker: pytest.fixture) -> None:
     """Test getting history when cache is empty."""
     mock_cache = MagicMock()

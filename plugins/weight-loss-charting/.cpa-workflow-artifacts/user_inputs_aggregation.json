@@ -181,6 +181,10 @@
     {
       "input": "clean them up",
       "type": "free_text"
+    },
+    {
+      "input": "/clear",
+      "type": "slash_command"
     }
   ]
 }
